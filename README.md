@@ -1,4 +1,4 @@
-# Re_Stick-It
+# re_Stick-It
 
 Lightweight desktop sticky notes for Windows, built with WPF on `.NET 8`, blah, blah, blah.
 
@@ -63,16 +63,16 @@ Lightweight desktop sticky notes for Windows, built with WPF on `.NET 8`, blah, 
 
 1. Clone the repo
 2. Open the solution in Visual Studio
-3. Set `Re_Stick-It` as startup project
+3. Set `re_Stick-It` as startup project
 4. Build and run (`F5`)
 
 ## Project Structure (high level)
 
-- `Re_Stick-It/App.xaml.cs` — app lifecycle, window spawning, save queue, tray behavior
-- `Re_Stick-It/Notes/` — note windows and note management UI
-- `Re_Stick-It/Persistence/` — JSON storage + persisted models
-- `Re_Stick-It/Services/` — tray, theme, startup registry, monitor affinity, etc.
-- `Re_Stick-It/Sticky/` — sticky target support/services
+- `re_Stick-It/App.xaml.cs` — app lifecycle, window spawning, save queue, tray behavior
+- `re_Stick-It/Notes/` — note windows and note management UI
+- `re_Stick-It/Persistence/` — JSON storage + persisted models
+- `re_Stick-It/Services/` — tray, theme, startup registry, monitor affinity, etc.
+- `re_Stick-It/Sticky/` — sticky target support/services
 
 ## Persistence
 
