@@ -67,6 +67,7 @@ namespace StickIt.Persistence
 
       // Default to true so people see the cool feature on update!
       public bool EnableNoteRotation { get; set; } = true;
+      public double MaxNoteRotation { get; set; } = 4.0; // Default to your favorite value
       public bool EnableNoteAging { get; set; } = true;
 
       public bool SyncEnabled { get; set; }

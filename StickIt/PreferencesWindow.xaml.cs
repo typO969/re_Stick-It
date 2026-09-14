@@ -31,7 +31,7 @@ namespace StickIt
          DataContext = _viewModel;
          InitializeSandboxEditors();
 
-      
+
       }
 
       private App AppInstance => (App)System.Windows.Application.Current;
@@ -298,7 +298,7 @@ namespace StickIt
       public bool Mode2MinimizeWithHost { get => _mode2MinimizeWithHost; set => SetField(ref _mode2MinimizeWithHost, value); }
 
       public bool EnableNoteRotation { get => _enableNoteRotation; set => SetField(ref _enableNoteRotation, value); }
-
+      public double MaxNoteRotation { get => _maxNoteRotation; set => SetField(ref _maxNoteRotation, value); }
       public bool EnableNoteAging { get => _enableNoteAging; set => SetField(ref _enableNoteAging, value); }
 
       public bool Mode2CloseNoteWhenHostCloses { get => _mode2CloseNoteWhenHostCloses; set => SetField(ref _mode2CloseNoteWhenHostCloses, value); }
@@ -421,6 +421,7 @@ namespace StickIt
       private string _lastSyncSummary = "Never";
       private string _todoTemplateRtf = string.Empty;
       private bool _enableNoteRotation = true;
+      private double _maxNoteRotation = 4.0;
       private bool _enableNoteAging = true;
 
       public event PropertyChangedEventHandler? PropertyChanged;
@@ -506,6 +507,7 @@ namespace StickIt
             DesktopAreaWidth = prefs.DesktopAreaWidth,
             DesktopAreaHeight = prefs.DesktopAreaHeight,
             EnableNoteRotation = prefs.EnableNoteRotation,
+            MaxNoteRotation = prefs.MaxNoteRotation >= 1.0 ? prefs.MaxNoteRotation : 4.0,
             EnableNoteAging = prefs.EnableNoteAging
 
          };
@@ -568,6 +570,7 @@ namespace StickIt
             DesktopAreaHeight = DesktopAreaHeight,
             TodoTemplateRtf = TodoTemplateRtf,
             EnableNoteRotation = EnableNoteRotation,
+            MaxNoteRotation = MaxNoteRotation,
             EnableNoteAging = EnableNoteAging
          };
       }

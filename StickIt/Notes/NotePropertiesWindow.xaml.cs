@@ -1,5 +1,6 @@
 using System;
 using System.Windows;
+
 using StickIt.Persistence;
 using StickIt.Services;
 
@@ -10,7 +11,7 @@ namespace StickIt
       public NotePropertiesWindow(NoteWindow noteWindow)
       {
          InitializeComponent();
-       AppThemeService.ApplyDialogTheme(this);
+         AppThemeService.ApplyDialogTheme(this);
          DataContext = NotePropertiesViewModel.FromNoteWindow(noteWindow);
       }
 

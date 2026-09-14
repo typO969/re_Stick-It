@@ -47,6 +47,7 @@ namespace StickIt
 
       private DispatcherTimer? _stickyCoalesceTimer;
       private bool _stickySnapPending;
+      private bool _isShuttingDown;
 
       private IntPtr _prevWin32Owner = IntPtr.Zero;
 
@@ -206,6 +207,9 @@ namespace StickIt
 
       private System.Windows.Point GetNoteTopLeftPx()
       {
+         if (!CanUseVisualTree())
+            return new System.Windows.Point(0, 0);
+
          var hwnd = new WindowInteropHelper(this).Handle;
          if (hwnd != IntPtr.Zero && WindowRectService.TryGetWindowRect(hwnd, out var rect))
             return new System.Windows.Point(rect.X, rect.Y);
@@ -214,6 +218,9 @@ namespace StickIt
          var dpi = VisualTreeHelper.GetDpi(this);
          return new System.Windows.Point(dip.X * Math.Max(0.01, dpi.DpiScaleX), dip.Y * Math.Max(0.01, dpi.DpiScaleY));
       }
+
+      private bool CanUseVisualTree()
+         => !_isShuttingDown && IsLoaded && PresentationSource.FromVisual(this) != null;
 
       private System.Windows.Point GetNoteCenterPx()
       {
@@ -376,7 +383,7 @@ namespace StickIt
       public void SetTitle(string title)
       {
          if (_note != null)
-            _note.Title = title ?? "Untitled";
+            _note.Title = title ?? "untitled";
       }
 
       public static readonly RoutedUICommand CmdBold =
@@ -395,6 +402,9 @@ namespace StickIt
 
       private void RequestStickySnap()
       {
+         if (_isShuttingDown || !CanUseVisualTree())
+            return;
+
          if (_stickyCoalesceTimer == null)
          {
             _stickyCoalesceTimer = new System.Windows.Threading.DispatcherTimer(
@@ -408,6 +418,7 @@ namespace StickIt
             {
                _stickyCoalesceTimer.Stop();
 
+               if (_isShuttingDown || !CanUseVisualTree()) return;
                if (!_stickySnapPending) return;
                _stickySnapPending = false;
 
@@ -497,51 +508,34 @@ namespace StickIt
 
          txtNoteContent.PreviewKeyDown += (s, e) =>
          {
-            if (e.Key == Key.Enter
-               && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt)) == ModifierKeys.None)
+            // Undo / Redo (Ctrl+Z / Ctrl+Y)
+            if (Keyboard.Modifiers == ModifierKeys.Control && (e.Key == Key.Z || e.Key == Key.Y))
             {
-               if (TryPropagateListMarkerOnEnter())
-               {
-                  e.Handled = true;
-                  return;
-               }
-            }
-
-            if (e.Key == Key.Back
-               && (Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift | ModifierKeys.Alt)) == ModifierKeys.None)
-            {
-               if (TryHandleBackspaceOnEmptyListItem())
-               {
-                  e.Handled = true;
-                  return;
-               }
-            }
-
-            var ctrl = (Keyboard.Modifiers & ModifierKeys.Control) != 0;
-            if (ctrl && (e.Key == Key.Z || e.Key == Key.Y))
                NoteUndoRedoRequested?.Invoke(this, EventArgs.Empty);
+               // Don't set e.Handled here unless your custom undo completely overrides the default one
+            }
 
-            if ((Keyboard.Modifiers & (ModifierKeys.Shift | ModifierKeys.Control | ModifierKeys.Alt)) == ModifierKeys.Shift
-               && e.Key == Key.Enter)
+            // Soft line break (Shift+Enter)
+            if (Keyboard.Modifiers == ModifierKeys.Shift && e.Key == Key.Enter)
             {
                EditingCommands.EnterParagraphBreak.Execute(null, txtNoteContent);
                e.Handled = true;
                return;
             }
 
-            if ((Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift)
-                     && e.Key == Key.X)
+            // Strikethrough (Ctrl+Shift+X) - Accepted exception to the Global rule!
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.X)
             {
-               ToggleStrikethrough(); // Ctrl+Shift+X
+               ToggleStrikethrough();
                e.Handled = true;
+               return;
             }
-
          };
 
 
 
          UpdateStickyVisuals();
-       
+
          _note = note;
          DataContext = _note;
          _lineHeightMultiplier = _note?.LineHeightMultiplier ?? _lineHeightMultiplier;
@@ -557,61 +551,84 @@ namespace StickIt
          ControlBar.MouseLeftButtonDown += ControlBar_MouseLeftButtonDown;
          btnMinimize.PreviewMouseLeftButtonDown += BtnMinimize_PreviewMouseLeftButtonDown;
 
+
+         // NEW KEYOBARD SHORTCUTS CODE-BEHIND SECTION!! 
          KeyDown += (_, e) =>
          {
-            if ((Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Shift)
-               && e.Key == Key.S)
+            // 1. Check for Ctrl + Alt + Shift combinations first
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift))
             {
-               btnPinCycle_Click(this, new RoutedEventArgs());
-               e.Handled = true;
+               if (e.Key == Key.S)
+               {
+                  if (_noteStuckMode == 2)
+                     Sticky_NotStuck_Click(this, new RoutedEventArgs());
+                  else
+                     Sticky_Auto_Click(this, new RoutedEventArgs());
+                  e.Handled = true;
+               }
                return;
             }
-
-            if ((Keyboard.Modifiers & (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift)) == (ModifierKeys.Control | ModifierKeys.Alt | ModifierKeys.Shift)
-               && e.Key == Key.S)
-            {
-               if (_noteStuckMode == 2)
-                  Sticky_NotStuck_Click(this, new RoutedEventArgs());
-               else
-                  Sticky_Auto_Click(this, new RoutedEventArgs());
-               e.Handled = true;
-               return;
-            }
-
-            // Ctrl+N / Ctrl+W / Ctrl+M
-            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0)
+            // 2. Check for Ctrl + Shift combinations (GLOBAL ACTIONS)
+            if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift))
             {
                switch (e.Key)
                {
-                  case Key.N:
-                     AppInstance.CreateNewNoteNear(this);   // makes a new note near cursor or current note
+                  case Key.S: // Your existing Pin Cycle
+                     btnPinCycle_Click(this, new RoutedEventArgs());
                      e.Handled = true;
                      return;
-
-                  case Key.W:
-                     Close(); // close = delete
+                  case Key.M: // Minimize All Notes
+                     Menu_MinimizeAll(this, new RoutedEventArgs());
                      e.Handled = true;
                      return;
-
-                  case Key.M:
-                     if (_noteStuckMode == 2)
-                        return;
-
-                     WindowState = WindowState.Minimized;  // minimize note (does not delete)
-                     AppInstance.QueueSaveFromWindow();
+                  case Key.P: // Open Preferences
+                     Menu_Preferences(this, new RoutedEventArgs());
                      e.Handled = true;
                      return;
                }
             }
-
-
-            if (e.Key == Key.F12)
+            // 3. Check for Ctrl-Only combinations (LOCAL ACTIONS)
+            if (Keyboard.Modifiers == ModifierKeys.Control)
+            {
+               switch (e.Key)
+               {
+                  case Key.N: // New Note
+                     AppInstance.CreateNewNoteNear(this);
+                     e.Handled = true;
+                     return;
+                  case Key.W: // Close / Delete Note
+                     Close();
+                     e.Handled = true;
+                     return;
+                  case Key.M: // Minimize Current Note
+                     if (_noteStuckMode == 2) return;
+                     WindowState = WindowState.Minimized;
+                     AppInstance.QueueSaveFromWindow();
+                     e.Handled = true;
+                     return;
+                  case Key.L: // Toggle Lock
+                     Menu_ToggleLock(this, new RoutedEventArgs());
+                     e.Handled = true;
+                     return;
+                  case Key.F: // Font Settings
+                     Menu_FontSettings(this, new RoutedEventArgs());
+                     e.Handled = true;
+                     return;
+                  case Key.K: // Ink Mode
+                     Menu_InkMode(this, new RoutedEventArgs());
+                     e.Handled = true;
+                     return;
+               }
+            }
+            // 4. Standalone Keys
+            if (Keyboard.Modifiers == ModifierKeys.None && e.Key == Key.F12)
             {
                new DebugColorsWindow(_note!) { Owner = this }.Show();
                e.Handled = true;
             }
+         };       // ENDS KEYBOARD SHORTCUT SECTION
 
-         };
+
 
          Loaded += (s, e) =>
          {
@@ -635,6 +652,21 @@ namespace StickIt
          });
       }
 
+
+      protected override void OnClosing(CancelEventArgs e)
+      {
+         _isShuttingDown = true;
+
+         try
+         {
+            _stickySnapPending = false;
+            _stickyCoalesceTimer?.Stop();
+            StopHook();
+         }
+         catch { }
+
+         base.OnClosing(e);
+      }
 
       protected override void OnClosed(EventArgs e)
       {
@@ -660,6 +692,7 @@ namespace StickIt
             // best-effort
          }
 
+         try { StopHook(); } catch { }
          try { ClearLocalAotOwner(); } catch { }
          base.OnClosed(e);
       }
@@ -690,7 +723,7 @@ namespace StickIt
 
 
 
-      private void ApplyLockState()
+      public void ApplyLockState()
       {
          if (_note == null) return;
          bool locked = _note.IsLocked;
@@ -721,70 +754,270 @@ namespace StickIt
       {
          if (_note == null || NoteRotation == null) return;
 
-         // 1. If the user disabled the realism feature, force the angle to 0 visually
+         // 1. If disabled, force visual angle to 0
          if (!AppInstance.Preferences.EnableNoteRotation)
          {
             NoteRotation.Angle = 0;
-            return; // Exit early, we don't want to change the underlying saved RotationAngle
+            return;
          }
 
-         // 2. If the feature is enabled and it's a new (or newly updated) note, randomize it
+         // Grab the slider value (fallback to 4 if something goes wrong)
+         double maxRot = AppInstance.Preferences.MaxNoteRotation;
+         if (maxRot < 1.0) maxRot = 4.0;
+
+         // 2. If it's a new note, randomize it using the slider bounds
          if (_note.RotationAngle == 0)
          {
             Random rnd = new Random();
-            _note.RotationAngle = (rnd.NextDouble() * 8.0) - 4.0;
+            _note.RotationAngle = (rnd.NextDouble() * (maxRot * 2)) - maxRot;
+         } else
+         {
+            // 3. If it's an existing note, clamp it! 
+            // (If you turn the slider down, existing notes snap to the new limit)
+            if (_note.RotationAngle > maxRot) _note.RotationAngle = maxRot;
+            if (_note.RotationAngle < -maxRot) _note.RotationAngle = -maxRot;
          }
 
-         // 3. Apply the angle
+         // 4. Apply the final angle
          NoteRotation.Angle = _note.RotationAngle;
       }
 
       public void ApplyAging()
       {
-         if (_note == null) return;
+         if (_note == null || NoteChrome == null) return;
 
-         // Check if the feature is enabled and the note is at least 7 days old
-         bool isAged = AppInstance.Preferences.EnableNoteAging &&
-                      (DateTime.UtcNow - _note.Props.CreatedUtc).TotalDays >= 7.0;
+         AgingCanvas.Children.Clear();
+         NoteChrome.Clip = null;
+         StickyOverlay.Clip = null;
 
-         if (isAged)
+         if (!AppInstance.Preferences.EnableNoteAging) return;
+
+         double ageInDays = (DateTime.UtcNow - _note.Props.CreatedUtc).TotalDays;
+
+         // --- 1 YEAR EASTER EGG ---
+         if (ageInDays >= 365.0 && !_note.Props.HasSeenAnniversary)
          {
-            // 1. Cut the bottom-right corner off the paper (400x400)
-            var paperClip = new StreamGeometry();
-            using (var ctx = paperClip.Open())
-            {
-               ctx.BeginFigure(new System.Windows.Point(0, 0), true, true);
-               ctx.LineTo(new System.Windows.Point(400, 0), true, false);
-               ctx.LineTo(new System.Windows.Point(400, 360), true, false); // Stop 40px short
-               ctx.LineTo(new System.Windows.Point(360, 400), true, false); // Cut diagonally
-               ctx.LineTo(new System.Windows.Point(0, 400), true, false);
-            }
-            paperClip.Freeze();
-            if (NoteChrome != null) NoteChrome.Clip = paperClip;
+            if (NoteRotation != null) NoteRotation.Angle += 180;
+            this.PreviewMouseLeftButtonDown -= AnniversaryClickHandler;
+            this.PreviewMouseLeftButtonDown += AnniversaryClickHandler;
+         }
 
-            // 2. Cut the corner off the StickyOverlay (which is 406x406 due to Margin="-3")
-            var overlayClip = new StreamGeometry();
-            using (var ctx = overlayClip.Open())
-            {
-               ctx.BeginFigure(new System.Windows.Point(0, 0), true, true);
-               ctx.LineTo(new System.Windows.Point(406, 0), true, false);
-               ctx.LineTo(new System.Windows.Point(406, 363), true, false);
-               ctx.LineTo(new System.Windows.Point(363, 406), true, false);
-               ctx.LineTo(new System.Windows.Point(0, 406), true, false);
-            }
-            overlayClip.Freeze();
-            if (StickyOverlay != null) StickyOverlay.Clip = overlayClip;
+         // Determine the Milestone Stage (1 through 8)
+         int stage = 0;
+         if (ageInDays >= 60.0) stage = 8;
+         else if (ageInDays >= 53.0) stage = 7;
+         else if (ageInDays >= 45.0) stage = 6;
+         else if (ageInDays >= 38.0) stage = 5;
+         else if (ageInDays >= 30.0) stage = 4;
+         else if (ageInDays >= 21.0) stage = 3;
+         else if (ageInDays >= 14.0) stage = 2;
+         else if (ageInDays >= 7.0) stage = 1;
 
-            // 3. Show the folded flap
-            if (DogEarFlap != null) DogEarFlap.Visibility = Visibility.Visible;
+         if (stage == 0) return; // Note is fresh!
+
+         // Feed the Fold Engine based on logical, progressive wear-and-tear!
+         if (stage == 1) ApplyFolds("4ar");
+         else if (stage == 2) ApplyFolds("4cvr");
+         else if (stage == 3) ApplyFolds("4chl", "1al");
+         else if (stage == 4) ApplyFolds("4ar", "1chr");
+         else if (stage == 5) ApplyFolds("1cvl", "4chl");
+         else if (stage == 6) ApplyFolds("1al", "2dl", "3br"); // Updated to your custom combo!
+         else if (stage == 7) ApplyFolds("1chr", "4cvr", "2dl", "3br"); // Valid paired tear
+         else if (stage == 8) ApplyFolds("4chl", "1cvl", "3dr", "2bl"); // Max wear
+      }
+      private void ApplyFolds(params string[] folds)
+      {
+         var perimeter = new System.Windows.Media.PointCollection();
+
+         // Start top-left and top-right
+         perimeter.Add(new System.Windows.Point(0, 0));
+         perimeter.Add(new System.Windows.Point(400, 0));
+
+         // --- SECTION 4 (Right Edge & Bottom-Right Corner) ---
+         if (folds.Contains("4cvr"))
+         {
+            perimeter.Add(new System.Windows.Point(400, 308));
+            perimeter.Add(new System.Windows.Point(377, 400));
+            DrawFlap(new System.Windows.Point(400, 308), new System.Windows.Point(377, 400), new System.Windows.Point(357, 391));
+         } else if (folds.Contains("4ar"))
+         {
+            perimeter.Add(new System.Windows.Point(400, 360));
+            perimeter.Add(new System.Windows.Point(360, 400));
+            DrawFlap(new System.Windows.Point(400, 360), new System.Windows.Point(360, 400), new System.Windows.Point(360, 360));
+         } else if (folds.Contains("4chl"))
+         {
+            perimeter.Add(new System.Windows.Point(400, 380));
+            perimeter.Add(new System.Windows.Point(311, 400));
+            DrawFlap(new System.Windows.Point(400, 380), new System.Windows.Point(311, 400), new System.Windows.Point(390, 360));
          } else
          {
-            // Restore the full squares
-            if (NoteChrome != null) NoteChrome.Clip = null;
-            if (StickyOverlay != null) StickyOverlay.Clip = null;
-            if (DogEarFlap != null) DogEarFlap.Visibility = Visibility.Collapsed;
+            perimeter.Add(new System.Windows.Point(400, 400));
          }
+
+         // --- SECTION 3 (Right-Middle Bottom Edge) ---
+         if (folds.Contains("3dr"))
+         {
+            perimeter.Add(new System.Windows.Point(306, 400));
+            // We use X=161 to perfectly meet 2bl's peak! Y=375 to fix the transposed height.
+            perimeter.Add(new System.Windows.Point(161, 375));
+            if (!folds.Contains("2bl")) perimeter.Add(new System.Windows.Point(161, 400));
+
+            // Flap tip correctly folds UP to 172, 354
+            DrawFlap(new System.Windows.Point(306, 400), new System.Windows.Point(161, 375), new System.Windows.Point(172, 354));
+         } else if (folds.Contains("3br"))
+         {
+            perimeter.Add(new System.Windows.Point(298, 400));
+            perimeter.Add(new System.Windows.Point(234, 377)); // Meets 2dl perfectly
+            if (!folds.Contains("2dl")) perimeter.Add(new System.Windows.Point(254, 400));
+
+            DrawFlap(new System.Windows.Point(298, 400), new System.Windows.Point(234, 377), new System.Windows.Point(250, 360));
+         }
+
+         // --- SECTION 2 (Left-Middle Bottom Edge) ---
+         if (folds.Contains("2dl"))
+         {
+            if (!folds.Contains("3br")) perimeter.Add(new System.Windows.Point(254, 400));
+            perimeter.Add(new System.Windows.Point(234, 377)); // Peak
+            perimeter.Add(new System.Windows.Point(96, 400));
+
+            DrawFlap(new System.Windows.Point(234, 377), new System.Windows.Point(96, 400), new System.Windows.Point(228, 353));
+         } else if (folds.Contains("2bl"))
+         {
+            if (!folds.Contains("3dr")) perimeter.Add(new System.Windows.Point(161, 400));
+            perimeter.Add(new System.Windows.Point(161, 375)); // Peak
+            perimeter.Add(new System.Windows.Point(99, 400));
+
+            DrawFlap(new System.Windows.Point(161, 375), new System.Windows.Point(99, 400), new System.Windows.Point(157, 356));
+         }
+
+         // --- SECTION 1 (Bottom-Left Corner & Left Edge) ---
+         if (folds.Contains("1chr"))
+         {
+            // Perfect horizontal mirror of 4chl (400 - X)
+            perimeter.Add(new System.Windows.Point(89, 400));
+            perimeter.Add(new System.Windows.Point(0, 380));
+            DrawFlap(new System.Windows.Point(89, 400), new System.Windows.Point(0, 380), new System.Windows.Point(10, 360));
+         } else if (folds.Contains("1al"))
+         {
+            perimeter.Add(new System.Windows.Point(40, 400));
+            perimeter.Add(new System.Windows.Point(0, 360));
+            DrawFlap(new System.Windows.Point(40, 400), new System.Windows.Point(0, 360), new System.Windows.Point(40, 360));
+         } else if (folds.Contains("1cvl"))
+         {
+            perimeter.Add(new System.Windows.Point(22, 400));
+            perimeter.Add(new System.Windows.Point(0, 306));
+            DrawFlap(new System.Windows.Point(22, 400), new System.Windows.Point(0, 306), new System.Windows.Point(41, 390));
+         } else
+         {
+            perimeter.Add(new System.Windows.Point(0, 400));
+         }
+
+         // --- EXECUTE THE SCISSOR CUT ---
+
+         var paperClip = new System.Windows.Media.StreamGeometry();
+         using (var ctx = paperClip.Open())
+         {
+            ctx.BeginFigure(perimeter[0], true, true);
+            for (int i = 1; i < perimeter.Count; i++) ctx.LineTo(perimeter[i], true, false);
+         }
+         paperClip.Freeze();
+         NoteChrome.Clip = paperClip;
+
+         var overlayClip = new System.Windows.Media.StreamGeometry();
+         using (var ctx = overlayClip.Open())
+         {
+            ctx.BeginFigure(ScalePointForOverlay(perimeter[0]), true, true);
+            for (int i = 1; i < perimeter.Count; i++) ctx.LineTo(ScalePointForOverlay(perimeter[i]), true, false);
+         }
+         overlayClip.Freeze();
+         StickyOverlay.Clip = overlayClip;
       }
+      // Helper to mathematically push the clip outward for the red Sticky border
+      private System.Windows.Point ScalePointForOverlay(System.Windows.Point p)
+      {
+         double x = p.X;
+         double y = p.Y;
+         if (x == 0) x = -3;
+         else if (x == 400) x = 403; // Note: if you change width, adjust this!
+         if (y == 0) y = -3;
+         else if (y == 400) y = 403;
+         return new System.Windows.Point(x, y);
+      }
+      private void DrawFlap(System.Windows.Point p1, System.Windows.Point p2, System.Windows.Point p3)
+      {
+         var paperBrush = _note?.PaperBrush ?? System.Windows.Media.Brushes.Yellow;
+
+         // 1. The folded paper colored piece
+         var paperFlap = new System.Windows.Shapes.Polygon
+         {
+            Points = new System.Windows.Media.PointCollection { p1, p2, p3 },
+            Fill = paperBrush,
+            Effect = new System.Windows.Media.Effects.DropShadowEffect
+            {
+               BlurRadius = 5,
+               ShadowDepth = 2,
+               Opacity = 0.5,
+               Direction = 90
+            }
+         };
+
+         // 2. The darkened "back side of paper" shading
+         var shadeFlap = new System.Windows.Shapes.Polygon
+         {
+            Points = new System.Windows.Media.PointCollection { p1, p2, p3 },
+            Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(40, 0, 0, 0))
+         };
+
+         AgingCanvas.Children.Add(paperFlap);
+         AgingCanvas.Children.Add(shadeFlap);
+      }
+      private void AnniversaryClickHandler(object sender, System.Windows.Input.MouseButtonEventArgs e)
+      {
+         // 1. Remove the handler immediately so we don't spam the user with popups on every click!
+         this.PreviewMouseLeftButtonDown -= AnniversaryClickHandler;
+
+         // 2. Show your custom message
+         System.Windows.MessageBox.Show(this,
+             "Your note has lasted a year! Impressive! To celebrate, the note will be 'dancing on the ceiling' until you quit and restart the app.",
+             "Happy Anniversary!",
+             MessageBoxButton.OK,
+             MessageBoxImage.Information);
+
+         // 3. Mark the Easter egg as 'seen'. 
+         // It stays upside down for now, but on the NEXT app launch, it will skip the flip!
+         _note!.Props.HasSeenAnniversary = true;
+
+         // (Optional) Force a save so it doesn't forget if they crash
+         AppInstance.QueueSaveFromWindow();
+      }
+
+
+      public string GetStuckToWindowName()
+      {
+         // If we aren't in Mode 2, it's not stuck to anything
+         if (_noteStuckMode != 2) return "None";
+
+         if (_stickyTarget != null)
+         {
+            // Check if it's the desktop shell
+            var cls = _stickyTarget.ClassName?.Trim();
+            if (string.Equals(cls, "Progman", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(cls, "WorkerW", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(cls, "#32769", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(cls, "Desktop", StringComparison.OrdinalIgnoreCase))
+            {
+               return "[Desktop]";
+            }
+
+            // Otherwise, return the normal window title or process name
+            return !string.IsNullOrWhiteSpace(_stickyTarget.WindowTitle)
+                ? _stickyTarget.WindowTitle
+                : _stickyTarget.ProcessName ?? "Unknown Host";
+         }
+
+         return "Unknown Host";
+      }
+
 
 
 
@@ -1536,7 +1769,7 @@ namespace StickIt
       private void Menu_Copy(object sender, RoutedEventArgs e) => txtNoteContent.Copy();
       private void Menu_Paste(object sender, RoutedEventArgs e) => txtNoteContent.Paste();
 
-         private void Menu_TaskCompleted(object sender, RoutedEventArgs e)
+      private void Menu_TaskCompleted(object sender, RoutedEventArgs e)
       {
          // ✅ REPLACE the entire method body with this single line:
          ToggleStrikethrough();
@@ -1955,6 +2188,7 @@ namespace StickIt
 
       public bool SnapToStickyTargetNow()
       {
+         if (_isShuttingDown || !CanUseVisualTree()) return false;
          if (_noteStuckMode != 2) return false;
 
          // Ensure we have a live hwnd
@@ -3452,6 +3686,7 @@ namespace StickIt
 
       private void WinEvent_TargetMoved(IntPtr hwnd)
       {
+         if (_isShuttingDown) return;
          if (_noteStuckMode != 2) return;
          if (_stickyTarget == null) return;
          if (_stickyTarget.Hwnd == IntPtr.Zero) return;
@@ -3459,6 +3694,7 @@ namespace StickIt
          // Must marshal to UI thread
          Dispatcher.BeginInvoke(new Action(() =>
          {
+            if (_isShuttingDown || !CanUseVisualTree()) return;
             if (_noteStuckMode != 2) return;
             if (_stickyTarget == null) return;
             if (_stickyTarget.Hwnd == IntPtr.Zero) return;

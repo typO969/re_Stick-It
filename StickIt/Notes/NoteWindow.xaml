@@ -1,856 +1,864 @@
 ﻿<Window
-    x:Class="StickIt.NoteWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:conv="clr-namespace:StickIt.Converters"
-    xmlns:local="clr-namespace:StickIt"
-    Width="460"
-    Height="460"
-    MinWidth="460"
-    MinHeight="460"
-    MaxWidth="460"
-    MaxHeight="460"
-    AllowsTransparency="True"
-    Background="Transparent"
-    ResizeMode="NoResize"
-    UseLayoutRounding="False"
-    WindowStyle="None">
+   x:Class="StickIt.NoteWindow"
+   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+   xmlns:conv="clr-namespace:StickIt.Converters"
+   xmlns:local="clr-namespace:StickIt"
+   Width="460"
+   Height="460"
+   MinWidth="460"
+   MinHeight="460"
+   MaxWidth="460"
+   MaxHeight="460"
+   AllowsTransparency="True"
+   Background="Transparent"
+   ResizeMode="NoResize"
+   UseLayoutRounding="False"
+   WindowStyle="None">
 
 
-    <Window.Resources>
-        <conv:NoteComponentBrushConverter x:Key="NoteComponentBrush" />
-        <conv:SliderDefaultPositionConverter x:Key="SliderDefaultPositionConverter" />
+   <Window.Resources>
+      <conv:NoteComponentBrushConverter x:Key="NoteComponentBrush" />
+      <conv:SliderDefaultPositionConverter x:Key="SliderDefaultPositionConverter" />
 
-        <Style x:Key="NoteIconButton" TargetType="Button">
-            <Setter Property="Width" Value="16" />
-            <Setter Property="Height" Value="16" />
-            <Setter Property="Padding" Value="0" />
-            <Setter Property="BorderThickness" Value="0" />
-            <Setter Property="FontSize" Value="8" />
-            <Setter Property="Background" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}" />
-            <Setter Property="BorderBrush" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}" />
-            <Setter Property="Foreground" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border
-                            x:Name="bd"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="1">
-                            <ContentPresenter
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                TextElement.Foreground="{TemplateBinding Foreground}" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bd" Property="Opacity" Value="0.95" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="bd" Property="Opacity" Value="0.80" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="bd" Property="Opacity" Value="0.45" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <Style
-            x:Key="PinIconButtonStyle"
-            BasedOn="{StaticResource NoteIconButton}"
-            TargetType="Button">
-            <Setter Property="BorderThickness" Value="1" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                    <Setter Property="Background" Value="Black" />
-                    <Setter Property="BorderBrush" Value="Black" />
-                    <Setter Property="Foreground" Value="White" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
-                    <Setter Property="Background" Value="#FF0000" />
-                    <Setter Property="BorderBrush" Value="#FF0000" />
-                    <Setter Property="Foreground" Value="White" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="NoteChromeStyle" TargetType="Border">
-            <!--  Mode 0 defaults  -->
-            <Setter Property="BorderThickness" Value="2" />
-            <Setter Property="BorderBrush" Value="#44000000" />
-            <Setter Property="Effect">
-                <Setter.Value>
-                    <DropShadowEffect
-                        BlurRadius="10"
-                        Opacity="0.25"
+      <Style x:Key="NoteIconButton" TargetType="Button">
+         <Setter Property="Width" Value="16" />
+         <Setter Property="Height" Value="16" />
+         <Setter Property="Padding" Value="0" />
+         <Setter Property="BorderThickness" Value="0" />
+         <Setter Property="FontSize" Value="8" />
+         <Setter Property="Background" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}" />
+         <Setter Property="BorderBrush" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}" />
+         <Setter Property="Foreground" Value="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}" />
+         <Setter Property="Template">
+            <Setter.Value>
+               <ControlTemplate TargetType="Button">
+                  <Border
+                     x:Name="bd"
+                     Background="{TemplateBinding Background}"
+                     BorderBrush="{TemplateBinding BorderBrush}"
+                     BorderThickness="{TemplateBinding BorderThickness}"
+                     CornerRadius="1">
+                     <ContentPresenter
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        TextElement.Foreground="{TemplateBinding Foreground}" />
+                  </Border>
+                  <ControlTemplate.Triggers>
+                     <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="bd" Property="Opacity" Value="0.95" />
+                     </Trigger>
+                     <Trigger Property="IsPressed" Value="True">
+                        <Setter TargetName="bd" Property="Opacity" Value="0.80" />
+                     </Trigger>
+                     <Trigger Property="IsEnabled" Value="False">
+                        <Setter TargetName="bd" Property="Opacity" Value="0.45" />
+                     </Trigger>
+                  </ControlTemplate.Triggers>
+               </ControlTemplate>
+            </Setter.Value>
+         </Setter>
+      </Style>
+      <Style
+         x:Key="PinIconButtonStyle"
+         BasedOn="{StaticResource NoteIconButton}"
+         TargetType="Button">
+         <Setter Property="BorderThickness" Value="1" />
+         <Style.Triggers>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
+               <Setter Property="Background" Value="Black" />
+               <Setter Property="BorderBrush" Value="Black" />
+               <Setter Property="Foreground" Value="White" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
+               <Setter Property="Background" Value="#FF0000" />
+               <Setter Property="BorderBrush" Value="#FF0000" />
+               <Setter Property="Foreground" Value="White" />
+            </DataTrigger>
+         </Style.Triggers>
+      </Style>
+      <Style x:Key="NoteChromeStyle" TargetType="Border">
+         <!--  Mode 0 defaults  -->
+         <Setter Property="BorderThickness" Value="2" />
+         <Setter Property="BorderBrush" Value="#44000000" />
+         <Setter Property="Effect">
+            <Setter.Value>
+               <DropShadowEffect
+                  BlurRadius="10"
+                  Opacity="0.25"
+                  ShadowDepth="2" />
+            </Setter.Value>
+         </Setter>
+
+         <Style.Triggers>
+
+            <!--  Mode 1: Always on top (thicker + slightly stronger shadow)  -->
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
+               <Setter Property="BorderBrush" Value="Black" />
+               <Setter Property="Effect">
+                  <Setter.Value>
+                     <DropShadowEffect
+                        BlurRadius="14"
+                        Opacity="0.35"
                         ShadowDepth="2" />
-                </Setter.Value>
-            </Setter>
+                  </Setter.Value>
+               </Setter>
+            </DataTrigger>
 
-            <Style.Triggers>
+            <!--  Mode 2: Stuck (thicker + “tape/glow” vibe via softer shadow)  -->
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
+               <Setter Property="BorderBrush" Value="#FF0000" />
+               <Setter Property="Effect">
+                  <Setter.Value>
+                     <!--  shallow “halo” reads like adhesion without looking sci-fi  -->
+                     <DropShadowEffect
+                        BlurRadius="22"
+                        Opacity="0.35"
+                        ShadowDepth="0" />
+                  </Setter.Value>
+               </Setter>
+            </DataTrigger>
 
-                <!--  Mode 1: Always on top (thicker + slightly stronger shadow)  -->
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                    <Setter Property="BorderBrush" Value="Black" />
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <DropShadowEffect
-                                BlurRadius="14"
-                                Opacity="0.35"
-                                ShadowDepth="2" />
-                        </Setter.Value>
-                    </Setter>
-                </DataTrigger>
+         </Style.Triggers>
+      </Style>
 
-                <!--  Mode 2: Stuck (thicker + “tape/glow” vibe via softer shadow)  -->
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
-                    <Setter Property="BorderBrush" Value="#FF0000" />
-                    <Setter Property="Effect">
-                        <Setter.Value>
-                            <!--  shallow “halo” reads like adhesion without looking sci-fi  -->
-                            <DropShadowEffect
-                                BlurRadius="22"
-                                Opacity="0.35"
-                                ShadowDepth="0" />
-                        </Setter.Value>
-                    </Setter>
-                </DataTrigger>
-
-            </Style.Triggers>
-        </Style>
-
-        <Style x:Key="StickyAccentStyle" TargetType="Border">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="5" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                    <Setter Property="BorderBrush" Value="#CC000000" />
-                    <Setter Property="BorderThickness" Value="5" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
-                    <Setter Property="BorderBrush" Value="#FF0000" />
-                    <Setter Property="BorderThickness" Value="5" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
-        <Style x:Key="StickyOverlayStyle" TargetType="Border">
-            <Setter Property="BorderBrush" Value="Transparent" />
-            <Setter Property="BorderThickness" Value="5" />
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
-                    <Setter Property="BorderBrush" Value="#CC000000" />
-                    <Setter Property="BorderThickness" Value="4" />
-                </DataTrigger>
-                <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
-                    <Setter Property="BorderBrush" Value="#FF0000" />
-                    <Setter Property="BorderThickness" Value="5" />
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+      <Style x:Key="StickyAccentStyle" TargetType="Border">
+         <Setter Property="BorderBrush" Value="Transparent" />
+         <Setter Property="BorderThickness" Value="5" />
+         <Style.Triggers>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
+               <Setter Property="BorderBrush" Value="#CC000000" />
+               <Setter Property="BorderThickness" Value="5" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
+               <Setter Property="BorderBrush" Value="#FF0000" />
+               <Setter Property="BorderThickness" Value="5" />
+            </DataTrigger>
+         </Style.Triggers>
+      </Style>
+      <Style x:Key="StickyOverlayStyle" TargetType="Border">
+         <Setter Property="BorderBrush" Value="Transparent" />
+         <Setter Property="BorderThickness" Value="5" />
+         <Style.Triggers>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="1">
+               <Setter Property="BorderBrush" Value="#CC000000" />
+               <Setter Property="BorderThickness" Value="4" />
+            </DataTrigger>
+            <DataTrigger Binding="{Binding StuckMode, RelativeSource={RelativeSource AncestorType=Window}}" Value="2">
+               <Setter Property="BorderBrush" Value="#FF0000" />
+               <Setter Property="BorderThickness" Value="5" />
+            </DataTrigger>
+         </Style.Triggers>
+      </Style>
 
 
-        <DataTemplate x:Key="ColorSwatchIconTemplate">
-            <Border
-                Width="12"
-                Height="12"
-                Background="{Binding}"
-                BorderBrush="#66000000"
-                BorderThickness="1"
-                CornerRadius="2" />
-        </DataTemplate>
-
-        <conv:ColorKeyToBackgroundBrushConverter x:Key="ColorKeyToBgBrush" />
-
-    </Window.Resources>
-
-
-    <!--  - OUTER BORDER BEGINS HERE!!!!  -->
-    <!--  THIS IS THE NEW MASTER WRAPPER. It stays exactly 400x400 and spins inside the 460x460 window  -->
-    <Grid
-        Width="400"
-        Height="400"
-        HorizontalAlignment="Center"
-        VerticalAlignment="Center"
-        RenderTransformOrigin="0.5,0.5">
-
-        <!--  The rotation now applies to EVERYTHING inside this Grid  -->
-        <Grid.RenderTransform>
-            <RotateTransform x:Name="NoteRotation" Angle="0" />
-        </Grid.RenderTransform>
-
-        <Border
-            x:Name="NoteChrome"
-            Padding="0"
-            Background="{Binding PaperBrush}"
-            BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
+      <DataTemplate x:Key="ColorSwatchIconTemplate">
+         <Border
+            Width="12"
+            Height="12"
+            Background="{Binding}"
+            BorderBrush="#66000000"
             BorderThickness="1"
-            CornerRadius="1"
-            Style="{StaticResource NoteChromeStyle}">
+            CornerRadius="2" />
+      </DataTemplate>
 
-            <!--  NOTE: I removed the RenderTransform that used to be here!  -->
+      <conv:ColorKeyToBackgroundBrushConverter x:Key="ColorKeyToBgBrush" />
 
-            <Border.ContextMenu>
-                <ContextMenu Opened="NoteContextMenu_Opened">
-                    <!--  Lifecycle  -->
-                    <MenuItem
-                        Click="Menu_NewNote"
-                        Header="Add note"
-                        InputGestureText="Ctrl+N" />
-                    <MenuItem
-                        Click="Menu_Delete"
-                        Header="Delete note"
-                        InputGestureText="Ctrl+W" />
-
-                    <Separator />
-
-                    <!--  Color  -->
-                    <MenuItem
-                        x:Name="miNoteColors"
-                        Header="Note colors"
-                        SubmenuOpened="NoteColors_SubmenuOpened">
-
-                        <MenuItem
-                            x:Name="NeonPinkMenuItem"
-                            Click="Menu_Color"
-                            Header="Neon Pink"
-                            Tag="NeonPink">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#dc39e5"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="MulberryMenuItem"
-                            Click="Menu_Color"
-                            Header="Mulberry"
-                            Tag="Mulberry">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#974F70"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="FireballFuchsiaMenuItem"
-                            Click="Menu_Color"
-                            Header="Fireball Fuchsia"
-                            Tag="FireballFuchsia">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#DD4B99"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="PoppyMenuItem"
-                            Click="Menu_Color"
-                            Header="Poppy"
-                            Tag="Poppy">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#C67D4D"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="SaffronMenuItem"
-                            Click="Menu_Color"
-                            Header="Saffron"
-                            Tag="Saffron">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#CB5147"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="CurryMenuItem"
-                            Click="Menu_Color"
-                            Header="Curry"
-                            Tag="Curry">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#F0B555"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="ThreeMYellowMenuItem"
-                            Click="Menu_Color"
-                            Header="3M Yellow (Default)"
-                            Tag="ThreeMYellow">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#F7E03D"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="CanaryYellowMenuItem"
-                            Click="Menu_Color"
-                            Header="Canary Yellow"
-                            Tag="CanaryYellow">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#F9F8BC"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="NeonGreenMenuItem"
-                            Click="Menu_Color"
-                            Header="Neon Green"
-                            Tag="NeonGreen">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#A6FC41"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="AsparagusMenuItem"
-                            Click="Menu_Color"
-                            Header="Asparagus"
-                            Tag="Asparagus">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#809840"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="EmeraldMenuItem"
-                            Click="Menu_Color"
-                            Header="Emerald"
-                            Tag="Emerald">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#62BDB8"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                        <MenuItem
-                            x:Name="MediterraneanBlueMenuItem"
-                            Click="Menu_Color"
-                            Header="Mediterranean Blue"
-                            Tag="MediterraneanBlue">
-                            <MenuItem.Icon>
-                                <Border
-                                    Width="12"
-                                    Height="12"
-                                    Background="#4077C4"
-                                    BorderBrush="#66000000"
-                                    BorderThickness="1"
-                                    CornerRadius="2" />
-                            </MenuItem.Icon>
-                        </MenuItem>
-                    </MenuItem>
-
-                    <!--  Them there stickin modes, look out, y'all!  -->
-                    <MenuItem
-                        x:Name="miStickyRoot"
-                        Header="Sticky"
-                        SubmenuOpened="Sticky_SubmenuOpened">
-                        <MenuItem
-                            x:Name="miSticky_NotStuck"
-                            Click="Sticky_NotStuck_Click"
-                            Header="Not stuck - (Mode 0)" />
-                        <MenuItem
-                            x:Name="miSticky_AOT"
-                            Click="Sticky_AOT_Click"
-                            Header="Always on top - (Mode 1)" />
-                        <Separator />
-                        <MenuItem
-                            x:Name="miSticky_Auto"
-                            Click="Sticky_Auto_Click"
-                            Header="Stick note - (Mode 2)" />
-                        <MenuItem
-                            x:Name="miSticky_Pick"
-                            Click="Sticky_Pick_Click"
-                            Header="Stick note to specific window... - (Mode 2 alt.)" />
-                        <Separator />
-                        <MenuItem
-                            x:Name="miSticky_SnapNow"
-                            Click="Sticky_SnapNow_Click"
-                            Header="Snap to target now (debug)" />
-                    </MenuItem>
-
-                    <Separator />
-
-                    <!--  Font  -->
-                    <MenuItem Click="Menu_FontSettings" Header="Font settings..." />
-                    <MenuItem Header="Font _Properties">
-                        <MenuItem
-                            x:Name="miBold"
-                            Command="{x:Static local:NoteWindow.CmdBold}"
-                            Header="_Bold"
-                            IsCheckable="True" />
-                        <MenuItem
-                            x:Name="miItalic"
-                            Command="{x:Static local:NoteWindow.CmdItalic}"
-                            Header="_Italic"
-                            IsCheckable="True" />
-                        <MenuItem
-                            x:Name="miUnderline"
-                            Command="{x:Static local:NoteWindow.CmdUnderline}"
-                            Header="_Underline"
-                            IsCheckable="True" />
-                        <Separator />
-                        <MenuItem StaysOpenOnClick="True">
-                            <MenuItem.Header>
-                                <StackPanel Orientation="Vertical">
-                                    <TextBlock Text="Leading" />
-                                    <Grid>
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock
-                                            Grid.Column="0"
-                                            Margin="0,0,6,0"
-                                            VerticalAlignment="Center"
-                                            FontSize="10"
-                                            Text="min." />
-                                        <Grid Grid.Column="1">
-                                            <Slider
-                                                x:Name="LeadingSlider"
-                                                Width="140"
-                                                MinWidth="140"
-                                                IsEnabled="True"
-                                                IsSnapToTickEnabled="True"
-                                                Maximum="1.8"
-                                                Minimum="0.9"
-                                                TickFrequency="0.05"
-                                                ValueChanged="LeadingSlider_ValueChanged" />
-                                            <Border VerticalAlignment="Bottom" IsHitTestVisible="False">
-                                                <TextBlock
-                                                    FontSize="10"
-                                                    FontWeight="SemiBold"
-                                                    Text="•">
-                                                    <TextBlock.Margin>
-                                                        <MultiBinding Converter="{StaticResource SliderDefaultPositionConverter}">
-                                                            <Binding Path="ActualWidth" Source="{x:Reference LeadingSlider}" />
-                                                            <Binding Path="Minimum" Source="{x:Reference LeadingSlider}" />
-                                                            <Binding Path="Maximum" Source="{x:Reference LeadingSlider}" />
-                                                            <Binding Source="1.0" />
-                                                        </MultiBinding>
-                                                    </TextBlock.Margin>
-                                                </TextBlock>
-                                            </Border>
-                                        </Grid>
-                                        <TextBlock
-                                            Grid.Column="2"
-                                            Margin="6,0,0,0"
-                                            VerticalAlignment="Center"
-                                            FontSize="10"
-                                            Text="max" />
-                                    </Grid>
-                                </StackPanel>
-                            </MenuItem.Header>
-                        </MenuItem>
-                    </MenuItem>
-
-                    <MenuItem Header="Ink">
-                        <MenuItem
-                            x:Name="miInkMode"
-                            Click="Menu_InkMode"
-                            Header="Ink mode"
-                            IsCheckable="True" />
-                        <MenuItem
-                            x:Name="miInkEraseMode"
-                            Click="Menu_InkEraseMode"
-                            Header="Ink erase mode"
-                            IsCheckable="True" />
-                        <Separator />
-                        <MenuItem Click="Menu_ClearInk" Header="Clear ink" />
-                    </MenuItem>
+   </Window.Resources>
 
 
-                    <Separator />
+   <!--  - OUTER BORDER BEGINS HERE!!!!  -->
+   <!--  THIS IS THE NEW MASTER WRAPPER. It stays exactly 400x400 and spins inside the 460x460 window  -->
+   <Grid
+      Width="400"
+      Height="400"
+      HorizontalAlignment="Center"
+      VerticalAlignment="Center"
+      RenderTransformOrigin="0.5,0.5">
 
-                    <!--  Properties  -->
-                    <MenuItem Click="Menu_NoteProperties" Header="Note properties..." />
+      <!--  The rotation now applies to EVERYTHING inside this Grid  -->
+      <Grid.RenderTransform>
+         <RotateTransform x:Name="NoteRotation" Angle="0" />
+      </Grid.RenderTransform>
 
-                    <Separator />
+      <Border
+         x:Name="NoteChrome"
+         Padding="0"
+         Background="{Binding PaperBrush}"
+         BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
+         BorderThickness="1"
+         CornerRadius="1"
+         Style="{StaticResource NoteChromeStyle}">
 
-                    <MenuItem Click="Menu_StraightenNote" Header="Straighten Note" />
+         <!--  NOTE: I removed the RenderTransform that used to be here!  -->
 
-                    <Separator />
+         <Border.ContextMenu>
+            <ContextMenu Opened="NoteContextMenu_Opened">
+               <!--  Lifecycle  -->
+               <MenuItem
+                  Click="Menu_NewNote"
+                  Header="Add note"
+                  InputGestureText="Ctrl+N" />
+               <MenuItem
+                  Click="Menu_Delete"
+                  Header="Delete note"
+                  InputGestureText="Ctrl+W" />
 
-                    <!--  Editing  -->
-                    <!--<MenuItem Click="Menu_TaskCompleted" Header="Task completed" />
+               <Separator />
+
+               <!--  Color  -->
+               <MenuItem
+                  x:Name="miNoteColors"
+                  Header="Note colors"
+                  SubmenuOpened="NoteColors_SubmenuOpened">
+
+                  <MenuItem
+                     x:Name="NeonPinkMenuItem"
+                     Click="Menu_Color"
+                     Header="Neon Pink"
+                     Tag="NeonPink">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#dc39e5"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="MulberryMenuItem"
+                     Click="Menu_Color"
+                     Header="Mulberry"
+                     Tag="Mulberry">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#974F70"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="FireballFuchsiaMenuItem"
+                     Click="Menu_Color"
+                     Header="Fireball Fuchsia"
+                     Tag="FireballFuchsia">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#DD4B99"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="PoppyMenuItem"
+                     Click="Menu_Color"
+                     Header="Poppy"
+                     Tag="Poppy">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#C67D4D"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="SaffronMenuItem"
+                     Click="Menu_Color"
+                     Header="Saffron"
+                     Tag="Saffron">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#CB5147"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="CurryMenuItem"
+                     Click="Menu_Color"
+                     Header="Curry"
+                     Tag="Curry">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#F0B555"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="ThreeMYellowMenuItem"
+                     Click="Menu_Color"
+                     Header="3M Yellow (Default)"
+                     Tag="ThreeMYellow">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#F7E03D"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="CanaryYellowMenuItem"
+                     Click="Menu_Color"
+                     Header="Canary Yellow"
+                     Tag="CanaryYellow">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#F9F8BC"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="NeonGreenMenuItem"
+                     Click="Menu_Color"
+                     Header="Neon Green"
+                     Tag="NeonGreen">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#A6FC41"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="AsparagusMenuItem"
+                     Click="Menu_Color"
+                     Header="Asparagus"
+                     Tag="Asparagus">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#809840"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="EmeraldMenuItem"
+                     Click="Menu_Color"
+                     Header="Emerald"
+                     Tag="Emerald">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#62BDB8"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+                  <MenuItem
+                     x:Name="MediterraneanBlueMenuItem"
+                     Click="Menu_Color"
+                     Header="Mediterranean Blue"
+                     Tag="MediterraneanBlue">
+                     <MenuItem.Icon>
+                        <Border
+                           Width="12"
+                           Height="12"
+                           Background="#4077C4"
+                           BorderBrush="#66000000"
+                           BorderThickness="1"
+                           CornerRadius="2" />
+                     </MenuItem.Icon>
+                  </MenuItem>
+               </MenuItem>
+
+               <!--  Them there stickin modes, look out, y'all!  -->
+               <MenuItem
+                  x:Name="miStickyRoot"
+                  Header="Sticky"
+                  SubmenuOpened="Sticky_SubmenuOpened">
+                  <MenuItem
+                     x:Name="miSticky_NotStuck"
+                     Click="Sticky_NotStuck_Click"
+                     Header="Not stuck - (Mode 0)" />
+                  <MenuItem
+                     x:Name="miSticky_AOT"
+                     Click="Sticky_AOT_Click"
+                     Header="Always on top - (Mode 1)" />
+                  <Separator />
+                  <MenuItem
+                     x:Name="miSticky_Auto"
+                     Click="Sticky_Auto_Click"
+                     Header="Stick note - (Mode 2)" />
+                  <MenuItem
+                     x:Name="miSticky_Pick"
+                     Click="Sticky_Pick_Click"
+                     Header="Stick note to specific window... - (Mode 2 alt.)" />
+                  <Separator />
+                  <MenuItem
+                     x:Name="miSticky_SnapNow"
+                     Click="Sticky_SnapNow_Click"
+                     Header="Snap to target now (debug)" />
+               </MenuItem>
+
+               <Separator />
+
+               <!--  Font  -->
+               <MenuItem
+                  Click="Menu_FontSettings"
+                  Header="Font settings..."
+                  InputGestureText="Ctrl+F" />
+               <MenuItem Header="Font _Properties">
+                  <MenuItem
+                     x:Name="miBold"
+                     Command="{x:Static local:NoteWindow.CmdBold}"
+                     Header="_Bold"
+                     IsCheckable="True" />
+                  <MenuItem
+                     x:Name="miItalic"
+                     Command="{x:Static local:NoteWindow.CmdItalic}"
+                     Header="_Italic"
+                     IsCheckable="True" />
+                  <MenuItem
+                     x:Name="miUnderline"
+                     Command="{x:Static local:NoteWindow.CmdUnderline}"
+                     Header="_Underline"
+                     IsCheckable="True" />
+                  <Separator />
+                  <MenuItem StaysOpenOnClick="True">
+                     <MenuItem.Header>
+                        <StackPanel Orientation="Vertical">
+                           <TextBlock Text="Leading" />
+                           <Grid>
+                              <Grid.ColumnDefinitions>
+                                 <ColumnDefinition Width="Auto" />
+                                 <ColumnDefinition Width="*" />
+                                 <ColumnDefinition Width="Auto" />
+                              </Grid.ColumnDefinitions>
+                              <TextBlock
+                                 Grid.Column="0"
+                                 Margin="0,0,6,0"
+                                 VerticalAlignment="Center"
+                                 FontSize="10"
+                                 Text="min." />
+                              <Grid Grid.Column="1">
+                                 <Slider
+                                    x:Name="LeadingSlider"
+                                    Width="140"
+                                    MinWidth="140"
+                                    IsEnabled="True"
+                                    IsSnapToTickEnabled="True"
+                                    Maximum="1.8"
+                                    Minimum="0.9"
+                                    TickFrequency="0.05"
+                                    ValueChanged="LeadingSlider_ValueChanged" />
+                                 <Border VerticalAlignment="Bottom" IsHitTestVisible="False">
+                                    <TextBlock
+                                       FontSize="10"
+                                       FontWeight="SemiBold"
+                                       Text="•">
+                                       <TextBlock.Margin>
+                                          <MultiBinding Converter="{StaticResource SliderDefaultPositionConverter}">
+                                             <Binding Path="ActualWidth" Source="{x:Reference LeadingSlider}" />
+                                             <Binding Path="Minimum" Source="{x:Reference LeadingSlider}" />
+                                             <Binding Path="Maximum" Source="{x:Reference LeadingSlider}" />
+                                             <Binding Source="1.0" />
+                                          </MultiBinding>
+                                       </TextBlock.Margin>
+                                    </TextBlock>
+                                 </Border>
+                              </Grid>
+                              <TextBlock
+                                 Grid.Column="2"
+                                 Margin="6,0,0,0"
+                                 VerticalAlignment="Center"
+                                 FontSize="10"
+                                 Text="max" />
+                           </Grid>
+                        </StackPanel>
+                     </MenuItem.Header>
+                  </MenuItem>
+               </MenuItem>
+
+               <MenuItem Header="Ink">
+                  <MenuItem
+                     x:Name="miInkMode"
+                     Click="Menu_InkMode"
+                     Header="Ink mode"
+                     InputGestureText="Ctrl+K"
+                     IsCheckable="True" />
+                  <MenuItem
+                     x:Name="miInkEraseMode"
+                     Click="Menu_InkEraseMode"
+                     Header="Ink erase mode"
+                     IsCheckable="True" />
+                  <Separator />
+                  <MenuItem Click="Menu_ClearInk" Header="Clear ink" />
+               </MenuItem>
+
+
+               <Separator />
+
+               <!--  Properties  -->
+               <MenuItem Click="Menu_NoteProperties" Header="Note properties..." />
+
+               <Separator />
+
+               <MenuItem Click="Menu_StraightenNote" Header="Straighten Note" />
+
+               <Separator />
+
+               <!--  Editing  -->
+               <!--<MenuItem Click="Menu_TaskCompleted" Header="Task completed" />
                     <Separator />-->
-                    <MenuItem Click="Menu_Cut" Header="Cut" />
-                    <MenuItem Click="Menu_Copy" Header="Copy" />
-                    <MenuItem Click="Menu_Paste" Header="Paste" />
+               <MenuItem Click="Menu_Cut" Header="Cut" />
+               <MenuItem Click="Menu_Copy" Header="Copy" />
+               <MenuItem Click="Menu_Paste" Header="Paste" />
 
-                    <Separator />
+               <Separator />
 
-                    <!--  Save/Load (note: you already autosave, but keep these for parity)  -->
-                    <MenuItem Header="Saving/Loading">
-                        <MenuItem Click="Menu_SaveNow" Header="Save notes now" />
-                        <MenuItem Click="Menu_SyncNow" Header="Sync now" />
-                        <MenuItem Click="Menu_SyncPullNow" Header="Pull now" />
-                        <MenuItem Click="Menu_SyncPushNow" Header="Push now" />
-                        <Separator />
-                        <MenuItem
-                            x:Name="miExportNote"
-                            Click="Menu_ExportNote"
-                            Header="Export note..." />
-                        <MenuItem
-                            x:Name="miImportNote"
-                            Click="Menu_ImportNote"
-                            Header="Load note..." />
-                    </MenuItem>
+               <!--  Save/Load (note: you already autosave, but keep these for parity)  -->
+               <MenuItem Header="Saving/Loading">
+                  <MenuItem Click="Menu_SaveNow" Header="Save notes now" />
+                  <MenuItem Click="Menu_SyncNow" Header="Sync now" />
+                  <MenuItem Click="Menu_SyncPullNow" Header="Pull now" />
+                  <MenuItem Click="Menu_SyncPushNow" Header="Push now" />
+                  <Separator />
+                  <MenuItem
+                     x:Name="miExportNote"
+                     Click="Menu_ExportNote"
+                     Header="Export note..." />
+                  <MenuItem
+                     x:Name="miImportNote"
+                     Click="Menu_ImportNote"
+                     Header="Load note..." />
+               </MenuItem>
 
-                    <Separator />
+               <Separator />
 
-                    <MenuItem
-                        x:Name="miLockNote"
-                        Click="Menu_ToggleLock"
-                        Header="Lock Note"
-                        IsCheckable="True" />
-                    <Separator />
+               <MenuItem
+                  x:Name="miLockNote"
+                  Click="Menu_ToggleLock"
+                  Header="Lock Note"
+                  InputGestureText="Ctrl+L"
+                  IsCheckable="True" />
+               <Separator />
 
-                    <!--  Window state  -->
-                    <MenuItem
-                        Click="Menu_Minimize"
-                        Header="Minimize"
-                        InputGestureText="Ctrl+M" />
-                    <MenuItem Click="Menu_Restore" Header="Restore" />
-                    <MenuItem Click="Menu_MinimizeAll" Header="Minimize all notes" />
-                    <MenuItem Click="Menu_RestoreAll" Header="Restore hidden notes" />
+               <!--  Window state  -->
+               <MenuItem
+                  Click="Menu_Minimize"
+                  Header="Minimize"
+                  InputGestureText="Ctrl+M" />
+               <MenuItem Click="Menu_Restore" Header="Restore" />
+               <MenuItem
+                  Click="Menu_MinimizeAll"
+                  Header="Minimize all notes"
+                  InputGestureText="Ctrl+Shift+M" />
+               <MenuItem Click="Menu_RestoreAll" Header="Restore hidden notes" />
 
-                    <Separator />
+               <Separator />
 
-                    <!--  App-level  -->
-                    <MenuItem Click="Menu_Preferences" Header="Preferences..." />
-                    <MenuItem Click="Menu_NoteManager" Header="Note manager..." />
+               <!--  App-level  -->
+               <MenuItem
+                  Click="Menu_Preferences"
+                  Header="Preferences..."
+                  InputGestureText="Ctrl+Shift+P" />
+               <MenuItem Click="Menu_NoteManager" Header="Note manager..." />
 
-                    <Separator />
+               <Separator />
 
-                    <!--  Debug parity  -->
-                    <MenuItem Click="Menu_Debug" Header="Colors Debug" />
-                    <MenuItem Click="Menu_About" Header="About" />
+               <!--  Debug parity  -->
+               <MenuItem Click="Menu_Debug" Header="Colors Debug" />
+               <MenuItem Click="Menu_About" Header="About" />
 
-                    <Separator />
+               <Separator />
 
-                    <MenuItem Click="Menu_Exit" Header="Quit StickIt" />
-                </ContextMenu>
-            </Border.ContextMenu>
+               <MenuItem Click="Menu_Exit" Header="Quit re_Stick-It" />
+            </ContextMenu>
+         </Border.ContextMenu>
+
+         <Grid>
+
+            <Border
+               x:Name="StickyAccent"
+               Margin="3"
+               Style="{StaticResource StickyAccentStyle}" />
+
 
             <Grid>
+               <Grid.RowDefinitions>
+                  <RowDefinition Height="25" />
+                  <RowDefinition Height="25" />
+                  <RowDefinition Height="350" />
+               </Grid.RowDefinitions>
 
-                <Border
-                    x:Name="StickyAccent"
-                    Margin="3"
-                    Style="{StaticResource StickyAccentStyle}" />
+               <!--  Control Bar  -->
+               <Border
+                  x:Name="ControlBar"
+                  Grid.Row="0"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=ControlBar}">
+
+                  <Grid>
+                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                     </Grid.ColumnDefinitions>
+
+                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+
+                        <Button
+                           x:Name="btnClose"
+                           Margin="20,0,0,0"
+                           Click="btnClose_Click"
+                           Content=""
+                           Style="{StaticResource NoteIconButton}"
+                           ToolTip="Close">
+
+                           <Button.Template>
+                              <ControlTemplate TargetType="Button">
+
+                                 <Border
+                                    x:Name="CloseButtonOuterBorder"
+                                    Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
+                                    BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    Opacity="0.80">
+
+                                    <Border
+                                       x:Name="CloseButtonInnerBorder"
+                                       Margin="1"
+                                       BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
+                                       BorderThickness="1"
+                                       CornerRadius="1"
+                                       Opacity="0.2">
+
+                                       <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+
+                                 </Border>
+
+                                 <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                       <Setter TargetName="CloseButtonOuterBorder" Property="Opacity" Value="1" />
+                                       <Setter TargetName="CloseButtonInnerBorder" Property="Opacity" Value="0.45" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                       <Setter TargetName="CloseButtonOuterBorder" Property="Opacity" Value="0.70" />
+                                    </Trigger>
+                                 </ControlTemplate.Triggers>
+
+                              </ControlTemplate>
+                           </Button.Template>
+                        </Button>
+
+                     </StackPanel>
+
+                     <StackPanel
+                        Grid.Column="1"
+                        Margin="0,0,20,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+
+                        <!--  left,right,top,bottom  -->
+                        <Button
+                           x:Name="btnPin"
+                           Margin="0,0,2,0"
+                           Click="btnPinCycle_Click"
+                           Content="📌"
+                           Style="{StaticResource PinIconButtonStyle}"
+                           ToolTip="Pin">
+
+                           <Button.Template>
+                              <ControlTemplate TargetType="Button">
+
+                                 <Border
+                                    x:Name="PinButtonOuterBorder"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="2"
+                                    Opacity="0.80">
+
+                                    <Border
+                                       x:Name="PinButtonInnerBorder"
+                                       Margin="1"
+                                       BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
+                                       BorderThickness="1"
+                                       CornerRadius="1"
+                                       Opacity="0.25">
+
+                                       <ContentPresenter
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.Foreground="{TemplateBinding Foreground}" />
+                                    </Border>
+
+                                 </Border>
+
+                                 <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                       <Setter TargetName="PinButtonOuterBorder" Property="Opacity" Value="1" />
+                                       <Setter TargetName="PinButtonInnerBorder" Property="Opacity" Value="0.50" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                       <Setter TargetName="PinButtonOuterBorder" Property="Opacity" Value="0.70" />
+                                    </Trigger>
+                                 </ControlTemplate.Triggers>
+
+                              </ControlTemplate>
+                           </Button.Template>
+                        </Button>
+
+                        <Button
+                           x:Name="btnMinimize"
+                           Click="btnMinimize_Click"
+                           Content="&#xE75D;"
+                           FontFamily="Segoe MDL2 Assets"
+                           Style="{StaticResource NoteIconButton}"
+                           ToolTip="Minimize">
+
+                           <Button.Template>
+                              <ControlTemplate TargetType="Button">
+
+                                 <Border
+                                    x:Name="MinimizeButtonOuterBorder"
+                                    Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
+                                    BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
+                                    BorderThickness="1"
+                                    CornerRadius="2"
+                                    Opacity="0.80">
+
+                                    <Border
+                                       x:Name="MinimizeButtonInnerBorder"
+                                       Margin="1"
+                                       BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
+                                       BorderThickness="1"
+                                       CornerRadius="1"
+                                       Opacity="0.25">
+
+                                       <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                    </Border>
+
+                                 </Border>
+
+                                 <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                       <Setter TargetName="MinimizeButtonOuterBorder" Property="Opacity" Value="1" />
+                                       <Setter TargetName="MinimizeButtonInnerBorder" Property="Opacity" Value="0.50" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="True">
+                                       <Setter TargetName="MinimizeButtonOuterBorder" Property="Opacity" Value="0.70" />
+                                    </Trigger>
+                                 </ControlTemplate.Triggers>
+
+                              </ControlTemplate>
+                           </Button.Template>
+                        </Button>
+
+                     </StackPanel>
+                  </Grid>
+               </Border>
+
+               <!--  Note Title  -->
+               <TextBox
+                  x:Name="txtNoteTitle"
+                  Grid.Row="1"
+                  Width="400"
+                  Height="25"
+                  MinWidth="400"
+                  MinHeight="25"
+                  MaxWidth="400"
+                  MaxHeight="25"
+                  HorizontalContentAlignment="Center"
+                  Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
+                  BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
+                  BorderThickness="0"
+                  FontFamily="Helvetica"
+                  FontSize="19"
+                  FontWeight="Bold"
+                  Foreground="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}"
+                  HorizontalScrollBarVisibility="Disabled"
+                  MaxLines="1"
+                  MouseLeftButtonDown="txtNoteTitle_select"
+                  PreviewMouseLeftButtonDown="txtNoteTitle_select"
+                  Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
+                  VerticalScrollBarVisibility="Disabled" />
+
+               <!--  Main Content Area  -->
+               <Grid Grid.Row="2">
+                  <RichTextBox
+                     x:Name="txtNoteContent"
+                     Width="400"
+                     Height="350"
+                     Background="{Binding PaperBrush}"
+                     BorderBrush="{Binding PaperBrush}"
+                     BorderThickness="0"
+                     CaretBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CaretBrush}"
+                     ContextMenu="{x:Null}"
+                     FontFamily="{Binding FontFamily}"
+                     FontSize="{Binding FontSize}"
+                     FontWeight="Normal"
+                     Foreground="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}"
+                     HorizontalScrollBarVisibility="Disabled"
+                     PreviewMouseRightButtonDown="txtNoteContent_PreviewMouseRightButtonDown"
+                     RenderTransformOrigin="0.5,0.5"
+                     VerticalScrollBarVisibility="Disabled" />
+
+                  <InkCanvas
+                     x:Name="inkLayer"
+                     Width="400"
+                     Height="350"
+                     Background="Transparent"
+                     EditingMode="Ink"
+                     IsHitTestVisible="False"
+                     UseCustomCursor="True" />
 
 
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="25" />
-                        <RowDefinition Height="25" />
-                        <RowDefinition Height="350" />
-                    </Grid.RowDefinitions>
 
-                    <!--  Control Bar  -->
-                    <Border
-                        x:Name="ControlBar"
-                        Grid.Row="0"
-                        HorizontalAlignment="Stretch"
-                        VerticalAlignment="Stretch"
-                        Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=ControlBar}">
-
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
-
-                                <Button
-                                    x:Name="btnClose"
-                                    Margin="20,0,0,0"
-                                    Click="btnClose_Click"
-                                    Content=""
-                                    Style="{StaticResource NoteIconButton}"
-                                    ToolTip="Close">
-
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-
-                                            <Border
-                                                x:Name="CloseButtonOuterBorder"
-                                                Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
-                                                BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
-                                                BorderThickness="1"
-                                                CornerRadius="2"
-                                                Opacity="0.80">
-
-                                                <Border
-                                                    x:Name="CloseButtonInnerBorder"
-                                                    Margin="1"
-                                                    BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="1"
-                                                    Opacity="0.2">
-
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-
-                                            </Border>
-
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="CloseButtonOuterBorder" Property="Opacity" Value="1" />
-                                                    <Setter TargetName="CloseButtonInnerBorder" Property="Opacity" Value="0.45" />
-                                                </Trigger>
-                                                <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="CloseButtonOuterBorder" Property="Opacity" Value="0.70" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-
-                            </StackPanel>
-
-                            <StackPanel
-                                Grid.Column="1"
-                                Margin="0,0,20,0"
-                                HorizontalAlignment="Right"
-                                Orientation="Horizontal">
-
-                                <!--  left,right,top,bottom  -->
-                                <Button
-                                    x:Name="btnPin"
-                                    Margin="0,0,2,0"
-                                    Click="btnPinCycle_Click"
-                                    Content="📌"
-                                    Style="{StaticResource PinIconButtonStyle}"
-                                    ToolTip="Pin">
-
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-
-                                            <Border
-                                                x:Name="PinButtonOuterBorder"
-                                                Background="{TemplateBinding Background}"
-                                                BorderBrush="{TemplateBinding BorderBrush}"
-                                                BorderThickness="{TemplateBinding BorderThickness}"
-                                                CornerRadius="2"
-                                                Opacity="0.80">
-
-                                                <Border
-                                                    x:Name="PinButtonInnerBorder"
-                                                    Margin="1"
-                                                    BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="1"
-                                                    Opacity="0.25">
-
-                                                    <ContentPresenter
-                                                        HorizontalAlignment="Center"
-                                                        VerticalAlignment="Center"
-                                                        TextElement.Foreground="{TemplateBinding Foreground}" />
-                                                </Border>
-
-                                            </Border>
-
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="PinButtonOuterBorder" Property="Opacity" Value="1" />
-                                                    <Setter TargetName="PinButtonInnerBorder" Property="Opacity" Value="0.50" />
-                                                </Trigger>
-                                                <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="PinButtonOuterBorder" Property="Opacity" Value="0.70" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-
-                                <Button
-                                    x:Name="btnMinimize"
-                                    Click="btnMinimize_Click"
-                                    Content="&#xE75D;"
-                                    FontFamily="Segoe MDL2 Assets"
-                                    Style="{StaticResource NoteIconButton}"
-                                    ToolTip="Minimize">
-
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-
-                                            <Border
-                                                x:Name="MinimizeButtonOuterBorder"
-                                                Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
-                                                BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Buttons}"
-                                                BorderThickness="1"
-                                                CornerRadius="2"
-                                                Opacity="0.80">
-
-                                                <Border
-                                                    x:Name="MinimizeButtonInnerBorder"
-                                                    Margin="1"
-                                                    BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Highlights}"
-                                                    BorderThickness="1"
-                                                    CornerRadius="1"
-                                                    Opacity="0.25">
-
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                                </Border>
-
-                                            </Border>
-
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="MinimizeButtonOuterBorder" Property="Opacity" Value="1" />
-                                                    <Setter TargetName="MinimizeButtonInnerBorder" Property="Opacity" Value="0.50" />
-                                                </Trigger>
-                                                <Trigger Property="IsPressed" Value="True">
-                                                    <Setter TargetName="MinimizeButtonOuterBorder" Property="Opacity" Value="0.70" />
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                </Button>
-
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-
-                    <!--  Note Title  -->
-                    <TextBox
-                        x:Name="txtNoteTitle"
-                        Grid.Row="1"
-                        Width="400"
-                        Height="25"
-                        MinWidth="400"
-                        MinHeight="25"
-                        MaxWidth="400"
-                        MaxHeight="25"
-                        HorizontalContentAlignment="Center"
-                        Background="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
-                        BorderBrush="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Background}"
-                        BorderThickness="0"
-                        FontFamily="Helvetica"
-                        FontSize="19"
-                        FontWeight="Bold"
-                        Foreground="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}"
-                        HorizontalScrollBarVisibility="Disabled"
-                        MaxLines="1"
-                        MouseLeftButtonDown="txtNoteTitle_select"
-                        PreviewMouseLeftButtonDown="txtNoteTitle_select"
-                        Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}"
-                        VerticalScrollBarVisibility="Disabled" />
-
-                    <!--  Main Content Area  -->
-                    <Grid Grid.Row="2">
-                        <RichTextBox
-                            x:Name="txtNoteContent"
-                            Width="400"
-                            Height="350"
-                            Background="{Binding PaperBrush}"
-                            BorderBrush="{Binding PaperBrush}"
-                            BorderThickness="0"
-                            CaretBrush="{Binding RelativeSource={RelativeSource AncestorType=Window}, Path=CaretBrush}"
-                            ContextMenu="{x:Null}"
-                            FontFamily="{Binding FontFamily}"
-                            FontSize="{Binding FontSize}"
-                            FontWeight="Normal"
-                            Foreground="{Binding ColorKey, Converter={StaticResource NoteComponentBrush}, ConverterParameter=Text}"
-                            HorizontalScrollBarVisibility="Disabled"
-                            PreviewMouseRightButtonDown="txtNoteContent_PreviewMouseRightButtonDown"
-                            RenderTransformOrigin="0.5,0.5"
-                            VerticalScrollBarVisibility="Disabled" />
-
-                        <InkCanvas
-                            x:Name="inkLayer"
-                            Width="400"
-                            Height="350"
-                            Background="Transparent"
-                            EditingMode="Ink"
-                            IsHitTestVisible="False"
-                            UseCustomCursor="True" />
-
-                        
-
-                    </Grid>
-                </Grid>
+               </Grid>
             </Grid>
-        </Border>
+         </Grid>
+      </Border>
 
-        <Border
-            x:Name="StickyOverlay"
-            Margin="-3"
-            IsHitTestVisible="False"
-            Style="{StaticResource StickyOverlayStyle}" />
+      <Border
+         x:Name="StickyOverlay"
+         Margin="-3"
+         IsHitTestVisible="False"
+         Style="{StaticResource StickyOverlayStyle}" />
 
-        <!-- NEW TRUE DOG-EAR FLAP -->
-        <Grid x:Name="DogEarFlap" Width="40" Height="40" HorizontalAlignment="Right" VerticalAlignment="Bottom" Visibility="Collapsed">
-            <!-- The actual folded paper -->
-            <Path Data="M 40,0 L 0,40 L 0,0 Z" Fill="{Binding PaperBrush}" />
-            <!-- Shading to make the 'back' of the paper look slightly darker -->
-            <Path Data="M 40,0 L 0,40 L 0,0 Z" Fill="#25000000" />
-            <Grid.Effect>
-                <!-- Shadow cast UP and LEFT (135 degrees) onto the note -->
-                <DropShadowEffect BlurRadius="5" ShadowDepth="2" Opacity="0.5" Direction="135" />
-            </Grid.Effect>
-        </Grid>
+      <!--  NEW DYNAMIC AGING CANVAS  -->
+      <Canvas
+         x:Name="AgingCanvas"
+         Width="400"
+         Height="400"
+         IsHitTestVisible="False" />
 
-    </Grid>
+   </Grid>
+   <!--  This is the end of the 400x400 Master Grid  -->
+
 </Window>

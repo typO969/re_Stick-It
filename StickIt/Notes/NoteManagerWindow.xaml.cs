@@ -2,6 +2,8 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
+
 using StickIt.Services;
 
 namespace StickIt
@@ -51,7 +53,6 @@ namespace StickIt
       {
          AppInstance.SaveAllNotesNow();
       }
-
       private void SyncNow_Click(object sender, RoutedEventArgs e)
       {
          if (AppInstance.TrySyncNow(out var message))
@@ -148,6 +149,57 @@ namespace StickIt
          AppInstance.QueueSaveFromWindow();
          RefreshItems();
       }
+
+      private void ManagerLockToggle_Click(object sender, RoutedEventArgs e)
+      {
+         if (sender is System.Windows.Controls.CheckBox cb && cb.Tag is NoteWindow window)
+         {
+            if (window.DataContext is StickIt.Models.NoteModel note)
+            {
+               note.IsLocked = (cb.IsChecked == true);
+               window.ApplyLockState();
+               AppInstance.QueueSaveFromWindow();
+            }
+         }
+      }
+
+      private void DebugForceAging_Click(object sender, RoutedEventArgs e)
+      {
+         if (sender is MenuItem mi && int.TryParse(mi.Tag?.ToString(), out int targetDays))
+         {
+            // Because your DataGrid uses a custom wrapper object, 
+            // we use dynamic to safely pull the Window property out of the selected row
+            dynamic selectedItem = NotesGrid.SelectedItem;
+            if (selectedItem == null) return;
+
+            // Grab the active NoteWindow and its underlying NoteModel
+            if (selectedItem.Window is NoteWindow openWindow &&
+                openWindow.DataContext is StickIt.Models.NoteModel selectedNote)
+            {
+               // TIME TRAVEL: Physically alter the creation date!
+               selectedNote.Props.CreatedUtc = DateTime.UtcNow.AddDays(-targetDays);
+
+               // Reset the Easter Egg flag so we can trigger it multiple times during testing
+               selectedNote.Props.HasSeenAnniversary = false;
+
+               // If we are testing the Easter Egg, reset the rotation first so it can cleanly flip 180 deg
+               if (targetDays == 365)
+               {
+                  openWindow.ApplyRotation();
+               }
+
+               // Trigger the redraw on the actual desktop window!
+               openWindow.ApplyAging();
+
+               // Force the app to save the new "fake" date to disk
+               ((App)System.Windows.Application.Current).QueueSaveFromWindow();
+
+               // Optional: Refresh the NoteManager list so it doesn't show old data
+               Refresh_Click(this, new RoutedEventArgs());
+            }
+         }
+      }
+
    }
 
    public sealed class NoteManagerItem
@@ -157,10 +209,37 @@ namespace StickIt
       public string Sticky { get; init; } = string.Empty;
       public string Modified { get; init; } = string.Empty;
       public string IsMinimized { get; init; } = string.Empty;
+
+      // --- NEW DEBUG PROPERTIES ---
+      public string StuckTo { get; init; } = string.Empty;
+      public double Rotation { get; init; }
+      public int AgeDays { get; init; }
+      public int AgingStage { get; init; }
+      public bool IsLocked { get; init; }
+
       public NoteWindow Window { get; init; } = null!;
 
       public static NoteManagerItem FromWindow(NoteWindow w)
       {
+         var noteModel = w.DataContext as StickIt.Models.NoteModel;
+         int age = 0;
+         int stage = 0;
+
+         if (noteModel != null)
+         {
+            age = (int)(DateTime.UtcNow - noteModel.Props.CreatedUtc).TotalDays;
+
+            // Calculate stage for the dashboard
+            if (age >= 60) stage = 8;
+            else if (age >= 53) stage = 7;
+            else if (age >= 45) stage = 6;
+            else if (age >= 38) stage = 5;
+            else if (age >= 30) stage = 4;
+            else if (age >= 21) stage = 3;
+            else if (age >= 14) stage = 2;
+            else if (age >= 7) stage = 1;
+         }
+
          return new NoteManagerItem
          {
             Title = string.IsNullOrWhiteSpace(w.GetTitle()) ? "Untitled" : w.GetTitle(),
@@ -168,6 +247,14 @@ namespace StickIt
             Sticky = StickyLabel(w.GetStuckMode()),
             Modified = FormatDate(w.GetModifiedUtc()),
             IsMinimized = w.GetIsMinimized() ? "Yes" : "No",
+
+            // --- POPULATE THE NEW COLUMNS ---
+            StuckTo = w.GetStuckToWindowName(), // <--- Calls the helper we just added!
+            Rotation = Math.Round(noteModel?.RotationAngle ?? 0.0, 1),
+            AgeDays = age,
+            AgingStage = stage,
+            IsLocked = noteModel?.IsLocked ?? false,
+
             Window = w
          };
       }

@@ -25,43 +25,190 @@
          FontWeight="SemiBold"
          Text="Note manager" />
 
-      <GroupBox Grid.Row="1" Margin="0,0,0,10" Header="Saving/Loading">
+      <GroupBox
+         Grid.Row="1"
+         Margin="0,0,0,10"
+         Header="Saving/Loading">
          <WrapPanel Margin="10">
-            <Button MinWidth="95" Margin="0,0,8,8" Click="AddNote_Click" Content="Add note" />
-            <Button MinWidth="110" Margin="0,0,8,8" Click="SaveNotesNow_Click" Content="Save notes now" />
-            <Button MinWidth="95" Margin="0,0,8,8" Click="SyncNow_Click" Content="Sync now" />
-            <Button MinWidth="95" Margin="0,0,8,8" Click="PullNow_Click" Content="Pull now" />
-            <Button MinWidth="95" Margin="0,0,8,8" Click="PushNow_Click" Content="Push now" />
-            <Button MinWidth="110" Margin="0,0,8,8" Click="ExportSelected_Click" Content="Export selected" />
-            <Button MinWidth="125" Margin="0,0,8,8" Click="LoadIntoSelected_Click" Content="Load into selected" />
+            <Button
+               MinWidth="95"
+               Margin="0,0,8,8"
+               Click="AddNote_Click"
+               Content="Add note" />
+            <Button
+               MinWidth="110"
+               Margin="0,0,8,8"
+               Click="SaveNotesNow_Click"
+               Content="Save notes now" />
+            <Button
+               MinWidth="95"
+               Margin="0,0,8,8"
+               Click="SyncNow_Click"
+               Content="Sync now" />
+            <Button
+               MinWidth="95"
+               Margin="0,0,8,8"
+               Click="PullNow_Click"
+               Content="Pull now" />
+            <Button
+               MinWidth="95"
+               Margin="0,0,8,8"
+               Click="PushNow_Click"
+               Content="Push now" />
+            <Button
+               MinWidth="110"
+               Margin="0,0,8,8"
+               Click="ExportSelected_Click"
+               Content="Export selected" />
+            <Button
+               MinWidth="125"
+               Margin="0,0,8,8"
+               Click="LoadIntoSelected_Click"
+               Content="Load into selected" />
          </WrapPanel>
       </GroupBox>
 
       <DataGrid
          x:Name="NotesGrid"
          Grid.Row="2"
+         AutoGenerateColumns="False"
          Background="{DynamicResource AppPanelBrush}"
          BorderBrush="{DynamicResource AppBorderBrush}"
-         Foreground="{DynamicResource AppForegroundBrush}"
-         AutoGenerateColumns="False"
          CanUserAddRows="False"
          CanUserDeleteRows="False"
+         Foreground="{DynamicResource AppForegroundBrush}"
          IsReadOnly="True"
          SelectionMode="Single">
+
+         <!--  NEW DEBUG MENU  -->
+         <DataGrid.ContextMenu>
+            <ContextMenu>
+               <MenuItem Header="[Debug] Force Aging Stage">
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 0 (Fresh, 0 days)"
+                     Tag="0" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 1 (1 Week)"
+                     Tag="7" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 2 (2 Weeks)"
+                     Tag="14" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 3 (3 Weeks)"
+                     Tag="21" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 4 (1 Month)"
+                     Tag="30" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 5 (38 Days)"
+                     Tag="38" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 6 (45 Days)"
+                     Tag="45" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 7 (53 Days)"
+                     Tag="53" />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Stage 8 (2 Months)"
+                     Tag="60" />
+                  <Separator />
+                  <MenuItem
+                     Click="DebugForceAging_Click"
+                     Header="Easter Egg (1 Year)"
+                     Tag="365" />
+               </MenuItem>
+            </ContextMenu>
+         </DataGrid.ContextMenu>
+
          <DataGrid.Columns>
-            <DataGridTextColumn Width="2*" Binding="{Binding Title}" Header="Title" />
-            <DataGridTextColumn Width="*" Binding="{Binding Color}" Header="Color" />
-            <DataGridTextColumn Width="*" Binding="{Binding Sticky}" Header="Sticky" />
-            <DataGridTextColumn Width="*" Binding="{Binding Modified}" Header="Modified" />
-            <DataGridTextColumn Width="*" Binding="{Binding IsMinimized}" Header="Minimized" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Title}"
+               Header="Title" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Color}"
+               Header="Color" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Sticky}"
+               Header="Sticky" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Modified}"
+               Header="Modified" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding IsMinimized}"
+               Header="Minimized" />
+
+            <!--  NEW DEBUG COLUMNS  -->
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding StuckTo}"
+               Header="Stuck To" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Rotation}"
+               Header="Rotation" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding AgeDays}"
+               Header="Age (Days)" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding AgingStage}"
+               Header="Stage" />
+            <DataGridTemplateColumn Width="Auto" Header="Locked">
+               <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                     <CheckBox
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Click="ManagerLockToggle_Click"
+                        IsChecked="{Binding IsLocked}"
+                        Tag="{Binding Window}" />
+                  </DataTemplate>
+               </DataGridTemplateColumn.CellTemplate>
+            </DataGridTemplateColumn>
+
+            <!--  Actions column...  -->
             <DataGridTemplateColumn Width="Auto" Header="Actions">
                <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate>
                      <StackPanel Orientation="Horizontal">
-                        <Button Margin="0,0,6,0" Padding="6,2" Content="Show" Tag="{Binding Window}" Click="Show_Click" />
-                        <Button Margin="0,0,6,0" Padding="6,2" Content="Minimize" Tag="{Binding Window}" Click="Minimize_Click" />
-                        <Button Margin="0,0,6,0" Padding="6,2" Content="Restore" Tag="{Binding Window}" Click="Restore_Click" />
-                        <Button Padding="6,2" Content="Close" Tag="{Binding Window}" Click="Close_Click" />
+                        <Button
+                           Margin="0,0,6,0"
+                           Padding="6,2"
+                           Click="Show_Click"
+                           Content="Show"
+                           Tag="{Binding Window}" />
+                        <Button
+                           Margin="0,0,6,0"
+                           Padding="6,2"
+                           Click="Minimize_Click"
+                           Content="Minimize"
+                           Tag="{Binding Window}" />
+                        <Button
+                           Margin="0,0,6,0"
+                           Padding="6,2"
+                           Click="Restore_Click"
+                           Content="Restore"
+                           Tag="{Binding Window}" />
+                        <Button
+                           Padding="6,2"
+                           Click="Close_Click"
+                           Content="Close"
+                           Tag="{Binding Window}" />
                      </StackPanel>
                   </DataTemplate>
                </DataGridTemplateColumn.CellTemplate>
@@ -69,9 +216,21 @@
          </DataGrid.Columns>
       </DataGrid>
 
-      <StackPanel Grid.Row="3" Margin="0,10,0,0" HorizontalAlignment="Right" Orientation="Horizontal">
-         <Button MinWidth="90" Margin="0,0,8,0" Click="Refresh_Click" Content="Refresh" />
-         <Button MinWidth="90" Click="Done_Click" Content="Done" IsDefault="True" />
+      <StackPanel
+         Grid.Row="3"
+         Margin="0,10,0,0"
+         HorizontalAlignment="Right"
+         Orientation="Horizontal">
+         <Button
+            MinWidth="90"
+            Margin="0,0,8,0"
+            Click="Refresh_Click"
+            Content="Refresh" />
+         <Button
+            MinWidth="90"
+            Click="Done_Click"
+            Content="Done"
+            IsDefault="True" />
       </StackPanel>
    </Grid>
 </Window>

@@ -39,6 +39,8 @@ namespace StickIt.Models
 
       public double RotationAngle { get; set; }
 
+      public bool HasSeenAnniversary { get; set; } = false;
+
       // Content metadata (not content itself)
       public int CharCount { get; set; }
 		public int WordCount { get; set; }

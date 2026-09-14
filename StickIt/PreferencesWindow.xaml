@@ -1,512 +1,557 @@
 <Window
-    x:Class="StickIt.PreferencesWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:conv="clr-namespace:StickIt.Converters"
-    Title="Preferences"
-    Width="765"
-    Height="954"
-    MinWidth="560"
-    MinHeight="480"
-    Background="{DynamicResource AppBackgroundBrush}"
-    Foreground="{DynamicResource AppForegroundBrush}"
-    ShowInTaskbar="False"
-    WindowStartupLocation="CenterScreen">
-    <Grid Margin="12" Background="{DynamicResource AppBackgroundBrush}">
-        <Grid.Resources>
-            <conv:SliderDefaultPositionConverter x:Key="SliderDefaultPositionConverter" />
-        </Grid.Resources>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+   x:Class="StickIt.PreferencesWindow"
+   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+   xmlns:conv="clr-namespace:StickIt.Converters"
+   Title="Preferences"
+   Width="765"
+   Height="954"
+   MinWidth="560"
+   MinHeight="480"
+   Background="{DynamicResource AppBackgroundBrush}"
+   Foreground="{DynamicResource AppForegroundBrush}"
+   ShowInTaskbar="False"
+   WindowStartupLocation="CenterScreen">
+   <Grid Margin="12" Background="{DynamicResource AppBackgroundBrush}">
+      <Grid.Resources>
+         <conv:SliderDefaultPositionConverter x:Key="SliderDefaultPositionConverter" />
+      </Grid.Resources>
+      <Grid.RowDefinitions>
+         <RowDefinition Height="*" />
+         <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
 
-        <TabControl Grid.Row="0">
-            <TabItem Header="General">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Margin="0,0,0,10" Header="General">
-                            <StackPanel Margin="10">
-                                <CheckBox Content="Automatically run StickIt when I log on to Windows" IsChecked="{Binding RunOnStartup}" />
-                                <CheckBox Content="Dark mode" IsChecked="{Binding DarkMode}" />
-                                <CheckBox Content="Show note's icons on taskbar" IsChecked="{Binding ShowTaskbarIcon}" />
-                                <CheckBox Content="Show StickIt icon inside system tray (notification area)" IsChecked="{Binding ShowTrayIcon}" />
-                            </StackPanel>
-                        </GroupBox>
+      <TabControl Grid.Row="0">
+         <TabItem Header="General">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+               <StackPanel Margin="10">
+                  <GroupBox Margin="0,0,0,10" Header="General">
+                     <StackPanel Margin="10">
+                        <CheckBox Content="Automatically run StickIt when I log on to Windows" IsChecked="{Binding RunOnStartup}" />
+                        <CheckBox Content="Dark mode" IsChecked="{Binding DarkMode}" />
+                        <CheckBox Content="Show note's icons on taskbar" IsChecked="{Binding ShowTaskbarIcon}" />
+                        <CheckBox Content="Show StickIt icon inside system tray (notification area)" IsChecked="{Binding ShowTrayIcon}" />
+                     </StackPanel>
+                  </GroupBox>
 
-                        <GroupBox Header="Notes">
-                            <StackPanel Margin="10">
-                                <CheckBox Content="Always stick new notes to Windows desktop" IsChecked="{Binding AlwaysStickNewNotesToDesktop}" />
-                                <CheckBox Content="Snap notes to grid" IsChecked="{Binding SnapNotesToGrid}" />
+                  <GroupBox Header="Notes">
+                     <StackPanel Margin="10">
+                        <CheckBox Content="Always stick new notes to Windows desktop" IsChecked="{Binding AlwaysStickNewNotesToDesktop}" />
+                        <CheckBox Content="Snap notes to grid" IsChecked="{Binding SnapNotesToGrid}" />
 
-                                <StackPanel
-                                    Margin="0,6,0,0"
-                                    VerticalAlignment="Center"
-                                    Orientation="Horizontal">
-                                    <CheckBox
-                                        VerticalAlignment="Center"
-                                        Content="Keep notes inside specific desktop area"
-                                        IsChecked="{Binding KeepNotesInsideDesktopArea}" />
-                                    <Button
-                                        MinWidth="110"
-                                        Margin="10,0,0,0"
-                                        Click="DesktopArea_Click"
-                                        Content="Desktop area..." />
-                                </StackPanel>
+                        <StackPanel
+                           Margin="0,6,0,0"
+                           VerticalAlignment="Center"
+                           Orientation="Horizontal">
+                           <CheckBox
+                              VerticalAlignment="Center"
+                              Content="Keep notes inside specific desktop area"
+                              IsChecked="{Binding KeepNotesInsideDesktopArea}" />
+                           <Button
+                              MinWidth="110"
+                              Margin="10,0,0,0"
+                              Click="DesktopArea_Click"
+                              Content="Desktop area..." />
+                        </StackPanel>
 
-                                <TextBlock
-                                    Margin="24,4,0,0"
-                                    FontSize="11"
-                                    Foreground="{DynamicResource AppForegroundBrush}"
-                                    Text="{Binding DesktopAreaSummary}" />
-
-                                <CheckBox
-                                    Margin="0,8,0,0"
-                                    Content="Show confirmation message when deleting a note"
-                                    IsChecked="{Binding ConfirmOnDelete}" />
-                                <CheckBox Content="Hide notes on Show Desktop (Win+D)" IsChecked="{Binding HideNotesOnShowDesktop}" />
-                                <CheckBox Content="Treat each desktop sticky note as separate top level window" IsChecked="{Binding TreatNotesAsTopLevelWindows}" />
-
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    Text="Stick to Window (Mode 2)" />
-                                <CheckBox Content="In mode 2, prevent moving note unless Lift is active" IsChecked="{Binding Mode2PreventManualMove}" />
-                                <CheckBox Content="In mode 2, minimize note when host is minimized" IsChecked="{Binding Mode2MinimizeWithHost}" />
-                                <CheckBox Content="Close note when host window closes in mode 2" IsChecked="{Binding Mode2CloseNoteWhenHostCloses}" />
-
-                                <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
-                                    <TextBlock
-                                        Width="294"
-                                        VerticalAlignment="Center"
-                                        Text="If host/parent window becomes missing in mode 2:" />
-                                    <ComboBox
-                                        Width="235"
-                                        DisplayMemberPath="Label"
-                                        ItemsSource="{Binding Mode2HostMissingActions}"
-                                        SelectedItem="{Binding SelectedMode2HostMissingAction}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-
-                        <!--  Realism Features Section  -->
                         <TextBlock
-                            Margin="0,15,0,2"
-                            FontWeight="SemiBold"
-                            Text="Realism Features" />
+                           Margin="24,4,0,0"
+                           FontSize="11"
+                           Foreground="{DynamicResource AppForegroundBrush}"
+                           Text="{Binding DesktopAreaSummary}" />
+
+                        <CheckBox
+                           Margin="0,8,0,0"
+                           Content="Show confirmation message when deleting a note"
+                           IsChecked="{Binding ConfirmOnDelete}" />
+                        <CheckBox Content="Hide notes on Show Desktop (Win+D)" IsChecked="{Binding HideNotesOnShowDesktop}" />
+                        <CheckBox Content="Treat each desktop sticky note as separate top level window" IsChecked="{Binding TreatNotesAsTopLevelWindows}" />
+
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           Text="Stick to Window (Mode 2)" />
+                        <CheckBox Content="In mode 2, prevent moving note unless Lift is active" IsChecked="{Binding Mode2PreventManualMove}" />
+                        <CheckBox Content="In mode 2, minimize note when host is minimized" IsChecked="{Binding Mode2MinimizeWithHost}" />
+                        <CheckBox Content="Close note when host window closes in mode 2" IsChecked="{Binding Mode2CloseNoteWhenHostCloses}" />
+
+                        <StackPanel Margin="0,6,0,0" Orientation="Horizontal">
+                           <TextBlock
+                              Width="294"
+                              VerticalAlignment="Center"
+                              Text="If host/parent window becomes missing in mode 2:" />
+                           <ComboBox
+                              Width="235"
+                              DisplayMemberPath="Label"
+                              ItemsSource="{Binding Mode2HostMissingActions}"
+                              SelectedItem="{Binding SelectedMode2HostMissingAction}" />
+                        </StackPanel>
+                     </StackPanel>
+                  </GroupBox>
+
+                  <!--  Realism Features Section  -->
+                  <TextBlock
+                     Margin="0,15,0,2"
+                     FontWeight="SemiBold"
+                     Text="Realism Features" />
+                  <Border
+                     Padding="6"
+                     BorderBrush="#7F7F7F"
+                     BorderThickness="1">
+                     <StackPanel>
+                        <CheckBox
+                           x:Name="chkEnableRotation"
+                           Margin="0,2,0,2"
+                           Content="Enable random note rotation (skeuomorphic tilt)"
+                           IsChecked="{Binding EnableNoteRotation}" />
+                        <StackPanel
+                           Margin="30,0,0,10"
+                           IsEnabled="{Binding EnableNoteRotation}"
+                           Orientation="Horizontal">
+                           <!--  The Minimum Label  -->
+                           <TextBlock
+                              Margin="0,0,8,0"
+                              VerticalAlignment="Center"
+                              Foreground="#888888"
+                              Text="±1°" />
+
+                           <!--  Your Slider  -->
+                           <Slider
+                              x:Name="sliderNoteRotation"
+                              Width="120"
+                              VerticalAlignment="Center"
+                              Interval="1"
+                              IsSnapToTickEnabled="True"
+                              LargeChange="3"
+                              Maximum="9"
+                              Minimum="1"
+                              SmallChange="1"
+                              TickPlacement="BottomRight"
+                              Value="{Binding MaxNoteRotation}" />
+
+                           <!--  The Maximum Label  -->
+                           <TextBlock
+                              Margin="8,0,0,0"
+                              VerticalAlignment="Center"
+                              Foreground="#888888"
+                              Text="±9°" />
+
+                           <!--  Optional: Show the actual current value  -->
+                           <TextBlock
+                              Margin="15,0,0,0"
+                              VerticalAlignment="Center"
+                              FontWeight="Bold"
+                              Text="{Binding Value, ElementName=sliderNoteRotation, StringFormat=N0}" />
+                           <TextBlock
+                              Margin="2,0,0,0"
+                              VerticalAlignment="Center"
+                              Foreground="#888888"
+                              Text="° variance" />
+                        </StackPanel>
+                        <CheckBox
+                           x:Name="chkEnableAging"
+                           Margin="0,2,0,2"
+                           Content="Enable dog-earring of the bottom note corner once notes reach a certin age"
+                           IsChecked="{Binding EnableNoteAging}" />
+
+                     </StackPanel>
+                  </Border>
+
+               </StackPanel>
+            </ScrollViewer>
+         </TabItem>
+
+         <TabItem Header="Note">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+               <StackPanel Margin="10">
+                  <GroupBox Margin="0,0,0,10" Header="Title &amp; Body (Defaults)">
+                     <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                           <RowDefinition Height="Auto" />
+                           <RowDefinition Height="Auto" />
+                           <RowDefinition Height="Auto" />
+                           <RowDefinition Height="Auto" />
+                           <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                           <ColumnDefinition Width="120" />
+                           <ColumnDefinition Width="*" />
+                           <ColumnDefinition Width="90" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBlock
+                           Grid.Row="0"
+                           VerticalAlignment="Center"
+                           Text="Title font:" />
+                        <ComboBox
+                           Grid.Row="0"
+                           Grid.Column="1"
+                           Margin="0,0,8,0"
+                           DisplayMemberPath="Source"
+                           ItemsSource="{Binding FontFamilies}"
+                           SelectedItem="{Binding TitleFontFamily}" />
+                        <ComboBox
+                           Grid.Row="0"
+                           Grid.Column="2"
+                           ItemsSource="{Binding FontSizes}"
+                           SelectedItem="{Binding TitleFontSize}" />
+
+                        <CheckBox
+                           Grid.Row="1"
+                           Grid.Column="1"
+                           Margin="0,8,0,0"
+                           Content="Title is bold"
+                           IsChecked="{Binding TitleFontBold}" />
+
+                        <TextBlock
+                           Grid.Row="2"
+                           Margin="0,8,0,0"
+                           VerticalAlignment="Center"
+                           Text="Body font:" />
+                        <ComboBox
+                           Grid.Row="2"
+                           Grid.Column="1"
+                           Margin="0,8,8,0"
+                           DisplayMemberPath="Source"
+                           ItemsSource="{Binding FontFamilies}"
+                           SelectedItem="{Binding BodyFontFamily}" />
+                        <ComboBox
+                           Grid.Row="2"
+                           Grid.Column="2"
+                           Margin="0,8,0,0"
+                           ItemsSource="{Binding FontSizes}"
+                           SelectedItem="{Binding BodyFontSize}" />
+
+                        <TextBlock
+                           Grid.Row="3"
+                           Margin="0,8,0,0"
+                           VerticalAlignment="Center"
+                           Text="Leading:" />
+                        <Grid
+                           Grid.Row="3"
+                           Grid.Column="1"
+                           Grid.ColumnSpan="2"
+                           Margin="0,8,0,0">
+                           <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="Auto" />
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                           </Grid.ColumnDefinitions>
+                           <TextBlock
+                              Grid.Column="0"
+                              Margin="0,0,6,0"
+                              VerticalAlignment="Center"
+                              FontSize="10"
+                              Text="min." />
+                           <Grid Grid.Column="1">
+                              <Slider
+                                 x:Name="PreferencesLeadingSlider"
+                                 IsSnapToTickEnabled="True"
+                                 Maximum="1.8"
+                                 Minimum="0.9"
+                                 TickFrequency="0.05"
+                                 Value="{Binding BodyLineHeightMultiplier}" />
+                              <Border
+                                 Margin="0,0,0,4"
+                                 VerticalAlignment="Bottom"
+                                 IsHitTestVisible="False">
+                                 <TextBlock
+                                    FontSize="10"
+                                    FontWeight="SemiBold"
+                                    Text="•">
+                                    <TextBlock.Margin>
+                                       <MultiBinding Converter="{StaticResource SliderDefaultPositionConverter}">
+                                          <Binding Path="ActualWidth" Source="{x:Reference PreferencesLeadingSlider}" />
+                                          <Binding Path="Minimum" Source="{x:Reference PreferencesLeadingSlider}" />
+                                          <Binding Path="Maximum" Source="{x:Reference PreferencesLeadingSlider}" />
+                                          <Binding Source="1.0" />
+                                       </MultiBinding>
+                                    </TextBlock.Margin>
+                                 </TextBlock>
+                              </Border>
+                           </Grid>
+                           <TextBlock
+                              Grid.Column="2"
+                              Margin="6,0,0,0"
+                              VerticalAlignment="Center"
+                              FontSize="10"
+                              Text="max" />
+                        </Grid>
+
+                        <CheckBox
+                           Grid.Row="4"
+                           Grid.Column="0"
+                           Grid.ColumnSpan="3"
+                           Margin="0,10,0,0"
+                           Content="Show date along with note title"
+                           IsChecked="{Binding ShowDateAlongTitle}" />
+                     </Grid>
+                  </GroupBox>
+
+                  <GroupBox Header="Appearance">
+                     <StackPanel Margin="10">
+                        <CheckBox Content="Enable drop shadow" IsChecked="{Binding EnableDropShadow}" />
+                        <CheckBox Content="Enable note borders" IsChecked="{Binding EnableNoteBorders}" />
+                     </StackPanel>
+                  </GroupBox>
+
+                  <GroupBox
+                     Height="563"
+                     Margin="0,10,0,0"
+                     Header="Automation">
+                     <StackPanel Margin="10">
+                        <CheckBox Content="Enable external note import/export commands" IsChecked="{Binding EnableExternalNoteImportExport}" />
+                        <CheckBox
+                           Margin="0,8,0,0"
+                           Content="Enable automatic bullet/number list formatting while typing"
+                           IsChecked="{Binding EnableAutoListFormatting}" />
+                        <CheckBox
+                           Margin="0,8,0,0"
+                           Content="Enable quick TODO template when title contains TODO"
+                           IsChecked="{Binding EnableTodoTitleTrigger}" />
+                        <TextBlock
+                           Margin="20,4,0,0"
+                           FontSize="11"
+                           IsEnabled="{Binding EnableTodoTitleTrigger}"
+                           Text="Hint: after typing TODO in the title, start body lines with -, *, +, or 1/2/3 to choose unordered or numbered TODO style." />
+                        <TextBlock
+                           Margin="20,2,0,0"
+                           FontSize="11"
+                           IsEnabled="{Binding EnableAutoListFormatting}"
+                           Text="Auto-list trigger: two consecutive lines must start with the same marker (or sequential numbers)." />
+
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           IsEnabled="{Binding EnableAutoListFormatting}"
+                           Text="Auto-list style" />
+                        <Grid IsEnabled="{Binding EnableAutoListFormatting}">
+                           <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="150" />
+                              <ColumnDefinition Width="200" />
+                              <ColumnDefinition Width="150" />
+                              <ColumnDefinition Width="120" />
+                           </Grid.ColumnDefinitions>
+                           <TextBlock VerticalAlignment="Center" Text="Bullet symbol:" />
+                           <ComboBox
+                              Grid.Column="1"
+                              Width="130"
+                              ItemsSource="{Binding AutoListBulletSymbols}"
+                              SelectedItem="{Binding AutoListBulletSymbol}" />
+                           <TextBlock
+                              Grid.Column="2"
+                              VerticalAlignment="Center"
+                              Text="Spaces after marker:" />
+                           <ComboBox
+                              Grid.Column="3"
+                              Width="80"
+                              ItemsSource="{Binding AutoListSpacingOptions}"
+                              SelectedItem="{Binding AutoListSpacesAfterMarker}" />
+                        </Grid>
+
+                        <StackPanel
+                           Margin="0,8,0,0"
+                           IsEnabled="{Binding EnableAutoListFormatting}"
+                           Orientation="Horizontal">
+                           <TextBlock
+                              Width="150"
+                              VerticalAlignment="Center"
+                              Text="Number suffix:" />
+                           <ComboBox
+                              Width="130"
+                              ItemsSource="{Binding AutoListNumberSuffixes}"
+                              SelectedItem="{Binding AutoListNumberSuffix}" />
+                        </StackPanel>
+
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           IsEnabled="{Binding EnableAutoListFormatting}"
+                           Text="Unordered list sandbox" />
                         <Border
-                            Padding="6"
-                            BorderBrush="#7F7F7F"
-                            BorderThickness="1">
-                            <StackPanel>
-                                <CheckBox
-                                    x:Name="chkEnableRotation"
-                                    Margin="0,2,0,2"
-                                    Content="Enable random note rotation (skeuomorphic tilt)"
-                                    IsChecked="{Binding EnableNoteRotation}" />
-                                <CheckBox
-                                    x:Name="chkEnableAging"
-                                    Margin="0,2,0,2"
-                                    Content="Enable dog-earring of the bottom note corner once notes reach a certin age"
-                                    IsChecked="{Binding EnableNoteAging}" />
-                            </StackPanel>
+                           Padding="6"
+                           BorderBrush="#7F7F7F"
+                           BorderThickness="1"
+                           IsEnabled="{Binding EnableAutoListFormatting}">
+                           <RichTextBox
+                              x:Name="BulletListSandbox"
+                              Height="62"
+                              AcceptsTab="True"
+                              TextChanged="BulletListSandbox_TextChanged"
+                              VerticalScrollBarVisibility="Auto" />
                         </Border>
 
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           IsEnabled="{Binding EnableAutoListFormatting}"
+                           Text="Numbered list sandbox" />
+                        <Border
+                           Padding="6"
+                           BorderBrush="#7F7F7F"
+                           BorderThickness="1"
+                           IsEnabled="{Binding EnableAutoListFormatting}">
+                           <RichTextBox
+                              x:Name="NumberListSandbox"
+                              Height="62"
+                              AcceptsTab="True"
+                              TextChanged="NumberListSandbox_TextChanged"
+                              VerticalScrollBarVisibility="Auto" />
+                        </Border>
 
-            <TabItem Header="Note">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Margin="0,0,0,10" Header="Title &amp; Body (Defaults)">
-                            <Grid Margin="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="120" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="90" />
-                                </Grid.ColumnDefinitions>
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           IsEnabled="{Binding EnableTodoTitleTrigger}"
+                           Text="TODO template sandbox" />
+                        <Border
+                           Padding="6"
+                           BorderBrush="#7F7F7F"
+                           BorderThickness="1"
+                           IsEnabled="{Binding EnableTodoTitleTrigger}">
+                           <RichTextBox
+                              x:Name="TodoTemplateSandbox"
+                              Height="62"
+                              AcceptsTab="True"
+                              TextChanged="TodoTemplateSandbox_TextChanged"
+                              VerticalScrollBarVisibility="Auto" />
+                        </Border>
 
-                                <TextBlock
-                                    Grid.Row="0"
-                                    VerticalAlignment="Center"
-                                    Text="Title font:" />
-                                <ComboBox
-                                    Grid.Row="0"
-                                    Grid.Column="1"
-                                    Margin="0,0,8,0"
-                                    DisplayMemberPath="Source"
-                                    ItemsSource="{Binding FontFamilies}"
-                                    SelectedItem="{Binding TitleFontFamily}" />
-                                <ComboBox
-                                    Grid.Row="0"
-                                    Grid.Column="2"
-                                    ItemsSource="{Binding FontSizes}"
-                                    SelectedItem="{Binding TitleFontSize}" />
+                        <TextBlock
+                           Margin="0,6,0,0"
+                           FontSize="11"
+                           Text="Sandbox edits auto-capture while this dialog is open. Click Cancel to discard." />
+                     </StackPanel>
+                  </GroupBox>
+               </StackPanel>
+            </ScrollViewer>
+         </TabItem>
+         <TabItem Header="Sync">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+               <StackPanel Margin="10">
+                  <GroupBox Header="Sync (Manual)">
+                     <StackPanel Margin="10">
+                        <CheckBox Content="Enable sync" IsChecked="{Binding SyncEnabled}" />
+                        <CheckBox
+                           Margin="0,6,0,0"
+                           Content="Sync preferences across devices"
+                           IsChecked="{Binding SyncPreferences}" />
 
-                                <CheckBox
-                                    Grid.Row="1"
-                                    Grid.Column="1"
-                                    Margin="0,8,0,0"
-                                    Content="Title is bold"
-                                    IsChecked="{Binding TitleFontBold}" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                           <TextBlock
+                              Width="135"
+                              VerticalAlignment="Center"
+                              Text="Sync behavior:" />
+                           <ComboBox
+                              Width="390"
+                              DisplayMemberPath="Label"
+                              ItemsSource="{Binding SyncModes}"
+                              SelectedItem="{Binding SelectedSyncMode}" />
+                        </StackPanel>
 
-                                <TextBlock
-                                    Grid.Row="2"
-                                    Margin="0,8,0,0"
-                                    VerticalAlignment="Center"
-                                    Text="Body font:" />
-                                <ComboBox
-                                    Grid.Row="2"
-                                    Grid.Column="1"
-                                    Margin="0,8,8,0"
-                                    DisplayMemberPath="Source"
-                                    ItemsSource="{Binding FontFamilies}"
-                                    SelectedItem="{Binding BodyFontFamily}" />
-                                <ComboBox
-                                    Grid.Row="2"
-                                    Grid.Column="2"
-                                    Margin="0,8,0,0"
-                                    ItemsSource="{Binding FontSizes}"
-                                    SelectedItem="{Binding BodyFontSize}" />
+                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                           <TextBlock
+                              Width="135"
+                              VerticalAlignment="Center"
+                              Text="When pulling:" />
+                           <ComboBox
+                              Width="390"
+                              DisplayMemberPath="Label"
+                              ItemsSource="{Binding SyncImportModes}"
+                              SelectedItem="{Binding SelectedSyncImportMode}" />
+                        </StackPanel>
 
-                                <TextBlock
-                                    Grid.Row="3"
-                                    Margin="0,8,0,0"
-                                    VerticalAlignment="Center"
-                                    Text="Leading:" />
-                                <Grid
-                                    Grid.Row="3"
-                                    Grid.Column="1"
-                                    Grid.ColumnSpan="2"
-                                    Margin="0,8,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="Auto" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock
-                                        Grid.Column="0"
-                                        Margin="0,0,6,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="10"
-                                        Text="min." />
-                                    <Grid Grid.Column="1">
-                                        <Slider
-                                            x:Name="PreferencesLeadingSlider"
-                                            IsSnapToTickEnabled="True"
-                                            Maximum="1.8"
-                                            Minimum="0.9"
-                                            TickFrequency="0.05"
-                                            Value="{Binding BodyLineHeightMultiplier}" />
-                                        <Border
-                                            Margin="0,0,0,4"
-                                            VerticalAlignment="Bottom"
-                                            IsHitTestVisible="False">
-                                            <TextBlock
-                                                FontSize="10"
-                                                FontWeight="SemiBold"
-                                                Text="•">
-                                                <TextBlock.Margin>
-                                                    <MultiBinding Converter="{StaticResource SliderDefaultPositionConverter}">
-                                                        <Binding Path="ActualWidth" Source="{x:Reference PreferencesLeadingSlider}" />
-                                                        <Binding Path="Minimum" Source="{x:Reference PreferencesLeadingSlider}" />
-                                                        <Binding Path="Maximum" Source="{x:Reference PreferencesLeadingSlider}" />
-                                                        <Binding Source="1.0" />
-                                                    </MultiBinding>
-                                                </TextBlock.Margin>
-                                            </TextBlock>
-                                        </Border>
-                                    </Grid>
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        Margin="6,0,0,0"
-                                        VerticalAlignment="Center"
-                                        FontSize="10"
-                                        Text="max" />
-                                </Grid>
+                        <CheckBox
+                           Margin="0,8,0,0"
+                           Content="Warn before replacing current notes on pull"
+                           IsChecked="{Binding WarnBeforeReplaceOnPull}" />
 
-                                <CheckBox
-                                    Grid.Row="4"
-                                    Grid.Column="0"
-                                    Grid.ColumnSpan="3"
-                                    Margin="0,10,0,0"
-                                    Content="Show date along with note title"
-                                    IsChecked="{Binding ShowDateAlongTitle}" />
-                            </Grid>
-                        </GroupBox>
+                        <TextBlock
+                           Margin="0,10,0,2"
+                           FontWeight="SemiBold"
+                           Text="Sync file" />
+                        <Grid>
+                           <Grid.ColumnDefinitions>
+                              <ColumnDefinition Width="*" />
+                              <ColumnDefinition Width="Auto" />
+                           </Grid.ColumnDefinitions>
+                           <TextBox
+                              Grid.Column="0"
+                              Margin="0,0,8,0"
+                              Text="{Binding SyncFilePath, UpdateSourceTrigger=PropertyChanged}" />
+                           <Button
+                              Grid.Column="1"
+                              Click="BrowseSyncFile_Click"
+                              Content="Browse..." />
+                        </Grid>
 
-                        <GroupBox Header="Appearance">
-                            <StackPanel Margin="10">
-                                <CheckBox Content="Enable drop shadow" IsChecked="{Binding EnableDropShadow}" />
-                                <CheckBox Content="Enable note borders" IsChecked="{Binding EnableNoteBorders}" />
-                            </StackPanel>
-                        </GroupBox>
+                        <TextBlock
+                           Margin="0,8,0,0"
+                           FontSize="11"
+                           Text="Manual sync only: StickIt syncs when you click Sync now." />
 
-                        <GroupBox
-                            Height="563"
-                            Margin="0,10,0,0"
-                            Header="Automation">
-                            <StackPanel Margin="10">
-                                <CheckBox Content="Enable external note import/export commands" IsChecked="{Binding EnableExternalNoteImportExport}" />
-                                <CheckBox
-                                    Margin="0,8,0,0"
-                                    Content="Enable automatic bullet/number list formatting while typing"
-                                    IsChecked="{Binding EnableAutoListFormatting}" />
-                                <CheckBox
-                                    Margin="0,8,0,0"
-                                    Content="Enable quick TODO template when title contains TODO"
-                                    IsChecked="{Binding EnableTodoTitleTrigger}" />
-                                <TextBlock
-                                    Margin="20,4,0,0"
-                                    FontSize="11"
-                                    IsEnabled="{Binding EnableTodoTitleTrigger}"
-                                    Text="Hint: after typing TODO in the title, start body lines with -, *, +, or 1/2/3 to choose unordered or numbered TODO style." />
-                                <TextBlock
-                                    Margin="20,2,0,0"
-                                    FontSize="11"
-                                    IsEnabled="{Binding EnableAutoListFormatting}"
-                                    Text="Auto-list trigger: two consecutive lines must start with the same marker (or sequential numbers)." />
+                        <TextBlock
+                           Margin="0,4,0,0"
+                           FontSize="11"
+                           Text="Free cloud sync method: point Sync file to a cloud-synced folder. Verified: OneDrive, Dropbox, Google Drive, and Sync.com."
+                           TextWrapping="Wrap" />
 
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    IsEnabled="{Binding EnableAutoListFormatting}"
-                                    Text="Auto-list style" />
-                                <Grid IsEnabled="{Binding EnableAutoListFormatting}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="150" />
-                                        <ColumnDefinition Width="200" />
-                                        <ColumnDefinition Width="150" />
-                                        <ColumnDefinition Width="120" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBlock VerticalAlignment="Center" Text="Bullet symbol:" />
-                                    <ComboBox
-                                        Grid.Column="1"
-                                        Width="130"
-                                        ItemsSource="{Binding AutoListBulletSymbols}"
-                                        SelectedItem="{Binding AutoListBulletSymbol}" />
-                                    <TextBlock
-                                        Grid.Column="2"
-                                        VerticalAlignment="Center"
-                                        Text="Spaces after marker:" />
-                                    <ComboBox
-                                        Grid.Column="3"
-                                        Width="80"
-                                        ItemsSource="{Binding AutoListSpacingOptions}"
-                                        SelectedItem="{Binding AutoListSpacesAfterMarker}" />
-                                </Grid>
+                        <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
+                           <Button
+                              MinWidth="95"
+                              Click="SyncNow_Click"
+                              Content="Sync now" />
+                           <Button
+                              MinWidth="95"
+                              Margin="8,0,0,0"
+                              Click="PullSync_Click"
+                              Content="Pull" />
+                           <Button
+                              MinWidth="95"
+                              Margin="8,0,0,0"
+                              Click="PushSync_Click"
+                              Content="Push" />
+                           <TextBlock
+                              Margin="10,2,0,0"
+                              VerticalAlignment="Center"
+                              Text="Last sync:" />
+                           <TextBlock
+                              Margin="6,2,0,0"
+                              VerticalAlignment="Center"
+                              FontWeight="SemiBold"
+                              Text="{Binding LastSyncSummary}" />
+                        </StackPanel>
+                     </StackPanel>
+                  </GroupBox>
+               </StackPanel>
+            </ScrollViewer>
+         </TabItem>
+      </TabControl>
 
-                                <StackPanel
-                                    Margin="0,8,0,0"
-                                    IsEnabled="{Binding EnableAutoListFormatting}"
-                                    Orientation="Horizontal">
-                                    <TextBlock
-                                        Width="150"
-                                        VerticalAlignment="Center"
-                                        Text="Number suffix:" />
-                                    <ComboBox
-                                        Width="130"
-                                        ItemsSource="{Binding AutoListNumberSuffixes}"
-                                        SelectedItem="{Binding AutoListNumberSuffix}" />
-                                </StackPanel>
-
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    IsEnabled="{Binding EnableAutoListFormatting}"
-                                    Text="Unordered list sandbox" />
-                                <Border
-                                    Padding="6"
-                                    BorderBrush="#7F7F7F"
-                                    BorderThickness="1"
-                                    IsEnabled="{Binding EnableAutoListFormatting}">
-                                    <RichTextBox
-                                        x:Name="BulletListSandbox"
-                                        Height="62"
-                                        AcceptsTab="True"
-                                        TextChanged="BulletListSandbox_TextChanged"
-                                        VerticalScrollBarVisibility="Auto" />
-                                </Border>
-
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    IsEnabled="{Binding EnableAutoListFormatting}"
-                                    Text="Numbered list sandbox" />
-                                <Border
-                                    Padding="6"
-                                    BorderBrush="#7F7F7F"
-                                    BorderThickness="1"
-                                    IsEnabled="{Binding EnableAutoListFormatting}">
-                                    <RichTextBox
-                                        x:Name="NumberListSandbox"
-                                        Height="62"
-                                        AcceptsTab="True"
-                                        TextChanged="NumberListSandbox_TextChanged"
-                                        VerticalScrollBarVisibility="Auto" />
-                                </Border>
-
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    IsEnabled="{Binding EnableTodoTitleTrigger}"
-                                    Text="TODO template sandbox" />
-                                <Border
-                                    Padding="6"
-                                    BorderBrush="#7F7F7F"
-                                    BorderThickness="1"
-                                    IsEnabled="{Binding EnableTodoTitleTrigger}">
-                                    <RichTextBox
-                                        x:Name="TodoTemplateSandbox"
-                                        Height="62"
-                                        AcceptsTab="True"
-                                        TextChanged="TodoTemplateSandbox_TextChanged"
-                                        VerticalScrollBarVisibility="Auto" />
-                                </Border>
-
-                                <TextBlock
-                                    Margin="0,6,0,0"
-                                    FontSize="11"
-                                    Text="Sandbox edits auto-capture while this dialog is open. Click Cancel to discard." />
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Header="Sync">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <GroupBox Header="Sync (Manual)">
-                            <StackPanel Margin="10">
-                                <CheckBox Content="Enable sync" IsChecked="{Binding SyncEnabled}" />
-                                <CheckBox
-                                    Margin="0,6,0,0"
-                                    Content="Sync preferences across devices"
-                                    IsChecked="{Binding SyncPreferences}" />
-
-                                <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                    <TextBlock
-                                        Width="135"
-                                        VerticalAlignment="Center"
-                                        Text="Sync behavior:" />
-                                    <ComboBox
-                                        Width="390"
-                                        DisplayMemberPath="Label"
-                                        ItemsSource="{Binding SyncModes}"
-                                        SelectedItem="{Binding SelectedSyncMode}" />
-                                </StackPanel>
-
-                                <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                    <TextBlock
-                                        Width="135"
-                                        VerticalAlignment="Center"
-                                        Text="When pulling:" />
-                                    <ComboBox
-                                        Width="390"
-                                        DisplayMemberPath="Label"
-                                        ItemsSource="{Binding SyncImportModes}"
-                                        SelectedItem="{Binding SelectedSyncImportMode}" />
-                                </StackPanel>
-
-                                <CheckBox
-                                    Margin="0,8,0,0"
-                                    Content="Warn before replacing current notes on pull"
-                                    IsChecked="{Binding WarnBeforeReplaceOnPull}" />
-
-                                <TextBlock
-                                    Margin="0,10,0,2"
-                                    FontWeight="SemiBold"
-                                    Text="Sync file" />
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox
-                                        Grid.Column="0"
-                                        Margin="0,0,8,0"
-                                        Text="{Binding SyncFilePath, UpdateSourceTrigger=PropertyChanged}" />
-                                    <Button
-                                        Grid.Column="1"
-                                        Click="BrowseSyncFile_Click"
-                                        Content="Browse..." />
-                                </Grid>
-
-                                <TextBlock
-                                    Margin="0,8,0,0"
-                                    FontSize="11"
-                                    Text="Manual sync only: StickIt syncs when you click Sync now." />
-
-                                <TextBlock
-                                    Margin="0,4,0,0"
-                                    FontSize="11"
-                                    Text="Free cloud sync method: point Sync file to a cloud-synced folder. Verified: OneDrive, Dropbox, Google Drive, and Sync.com."
-                                    TextWrapping="Wrap" />
-
-                                <StackPanel Margin="0,10,0,0" Orientation="Horizontal">
-                                    <Button
-                                        MinWidth="95"
-                                        Click="SyncNow_Click"
-                                        Content="Sync now" />
-                                    <Button
-                                        MinWidth="95"
-                                        Margin="8,0,0,0"
-                                        Click="PullSync_Click"
-                                        Content="Pull" />
-                                    <Button
-                                        MinWidth="95"
-                                        Margin="8,0,0,0"
-                                        Click="PushSync_Click"
-                                        Content="Push" />
-                                    <TextBlock
-                                        Margin="10,2,0,0"
-                                        VerticalAlignment="Center"
-                                        Text="Last sync:" />
-                                    <TextBlock
-                                        Margin="6,2,0,0"
-                                        VerticalAlignment="Center"
-                                        FontWeight="SemiBold"
-                                        Text="{Binding LastSyncSummary}" />
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-        </TabControl>
-
-        <StackPanel
-            Grid.Row="1"
-            Margin="0,10,0,0"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
-            <Button
-                Width="52"
-                MinWidth="60"
-                Margin="0,0,8,0"
-                Click="Cancel_Click"
-                Content="Cancel"
-                FontFamily="Helvetica"
-                FontStyle="Italic" />
-            <Button
-                Width="112"
-                MinWidth="90"
-                BorderBrush="#FF1C1C1C"
-                BorderThickness="2,2,2,2"
-                Click="Ok_Click"
-                Content="OK"
-                FontFamily="Helvetica"
-                FontSize="14"
-                FontWeight="Bold"
-                IsDefault="True" />
-        </StackPanel>
-    </Grid>
+      <StackPanel
+         Grid.Row="1"
+         Margin="0,10,0,0"
+         HorizontalAlignment="Right"
+         Orientation="Horizontal">
+         <Button
+            Width="52"
+            MinWidth="60"
+            Margin="0,0,8,0"
+            Click="Cancel_Click"
+            Content="Cancel"
+            FontFamily="Helvetica"
+            FontStyle="Italic" />
+         <Button
+            Width="112"
+            MinWidth="90"
+            BorderBrush="#FF1C1C1C"
+            BorderThickness="2,2,2,2"
+            Click="Ok_Click"
+            Content="OK"
+            FontFamily="Helvetica"
+            FontSize="14"
+            FontWeight="Bold"
+            IsDefault="True" />
+      </StackPanel>
+   </Grid>
 </Window>
