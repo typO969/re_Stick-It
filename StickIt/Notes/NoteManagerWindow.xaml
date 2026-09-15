@@ -154,6 +154,14 @@
             <!--  NEW DEBUG COLUMNS  -->
             <DataGridTextColumn
                Width="Auto"
+               Binding="{Binding X, StringFormat={}{0:F0}}"
+               Header="X" />
+            <DataGridTextColumn
+               Width="Auto"
+               Binding="{Binding Y, StringFormat={}{0:F0}}"
+               Header="Y" />
+            <DataGridTextColumn
+               Width="Auto"
                Binding="{Binding StuckTo}"
                Header="Stuck To" />
             <DataGridTextColumn

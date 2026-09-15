@@ -216,6 +216,8 @@ namespace StickIt
       public int AgeDays { get; init; }
       public int AgingStage { get; init; }
       public bool IsLocked { get; init; }
+      public double X { get; set; }
+      public double Y { get; set; }
 
       public NoteWindow Window { get; init; } = null!;
 
@@ -254,6 +256,8 @@ namespace StickIt
             AgeDays = age,
             AgingStage = stage,
             IsLocked = noteModel?.IsLocked ?? false,
+            X = w.Left,
+            Y = w.Top,
 
             Window = w
          };

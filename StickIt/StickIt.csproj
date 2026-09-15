@@ -10,15 +10,18 @@
     <ApplicationIcon>Properties\Icons\re_stickit.ico</ApplicationIcon>
     <PackageIcon>re_stickit-icon.jpg</PackageIcon>
     <SignAssembly>False</SignAssembly>
-    <AssemblyVersion>3.4.0</AssemblyVersion>
-    <FileVersion>3.4.1</FileVersion>
+    <AssemblyVersion>3.6.0</AssemblyVersion>
+    <FileVersion>3.6.0</FileVersion>
     <Title>Re_Stick-It</Title>
     <Company>969 Studios</Company>
-    <Product>Re_StickIt</Product>
+    <Product>Re_Stick-It</Product>
     <Copyright>Copyright (c) 969 Studios</Copyright>
     <PackageProjectUrl>https://github.com/typO969/Re_Stick-It</PackageProjectUrl>
     <RepositoryUrl>https://github.com/typO969/Re_Stick-It</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <AssemblyTitle>re_Stick-It</AssemblyTitle>
+    <Authors>969 Design</Authors>
+    <Description>Real. Digital. Notes.</Description>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="prefs2ThinkAbout__gather-red.png" />

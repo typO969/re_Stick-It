@@ -1307,28 +1307,32 @@ namespace StickIt
          const double newW = 400;
          const double newH = 400;
 
-         double desiredLeft, desiredTop;
+         double finalLeft, finalTop;
 
          if (anchor != null)
          {
-            desiredLeft = anchor.Left + 20;
-            desiredTop = anchor.Top + 20;
+            // 1. If we clicked a specific note, JUST SPAWN IT +30px down and right. 
+            // Do NOT run the collision checker, just let it cascade cleanly over the old note!
+            finalLeft = anchor.Left + 30;
+            finalTop = anchor.Top + 30;
          } else
          {
-            desiredLeft = _nextSpawnLeft;
-            desiredTop = _nextSpawnTop;
+            // 2. If we clicked the Tray Icon, try to find an empty space on the screen.
+            double desiredLeft = _nextSpawnLeft;
+            double desiredTop = _nextSpawnTop;
 
             _nextSpawnLeft += 24;
             _nextSpawnTop += 24;
+
+            var pos = FindNonOverlappingPosition(desiredLeft, desiredTop, newW, newH);
+            finalLeft = pos.X;
+            finalTop = pos.Y;
          }
-
-         var pos = FindNonOverlappingPosition(desiredLeft, desiredTop, newW, newH);
-
 
          var p = new NotePersist
          {
-            Left = pos.X,
-            Top = pos.Y,
+            Left = finalLeft,
+            Top = finalTop,
             Width = newW,
             Height = newH,
             Title = "Untitled",
@@ -1359,6 +1363,32 @@ namespace StickIt
             }
          }
 
+         // --- GEMINI UPDATE: Smart Z-Order Ejection ---
+         if (anchor != null)
+         {
+            // If the parent is aggressively asserting Z-order (Mode 1 or 2), 
+            // force the child into Mode 1 (Always On Top) so it doesn't get buried.
+            if (anchor.GetStuckMode() > 0)
+            {
+               p.StuckMode = 1;
+            }
+         } else if (Preferences.AlwaysStickNewNotesToDesktop)
+         {
+            // Only apply desktop stickiness if we clicked the Tray Icon (no anchor)
+            var desktop = DesktopTargetService.TryGetDesktopTarget();
+            if (desktop != null)
+            {
+               p.StuckMode = 2;
+               p.StickyTargetPersist = new StickyTargetPersist
+               {
+                  ProcessId = desktop.ProcessId,
+                  ProcessName = desktop.ProcessName,
+                  WindowTitle = desktop.WindowTitle,
+                  ClassName = desktop.ClassName,
+                  CapturedUtc = desktop.CapturedUtc
+               };
+            }
+         }
 
          // Add to state so it exists even if we crash before debounce tick
          _state.Notes.Add(p);
