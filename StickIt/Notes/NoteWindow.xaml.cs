@@ -38,6 +38,36 @@ namespace StickIt
       private double? _stickyTargetAnchorXPx;
       private double? _stickyTargetAnchorYPx;
 
+      private const int WM_MOUSEACTIVATE = 0x0021;
+      private const int MA_ACTIVATE = 1;
+      private const int MA_ACTIVATEANDEAT = 2;
+      private const int MA_NOACTIVATE = 3;
+      private const int MA_NOACTIVATEANDEAT = 4;
+
+      private static readonly IntPtr HWND_TOP = new(0);
+      private static readonly IntPtr HWND_BOTTOM = new(1);
+      private static readonly IntPtr HWND_TOPMOST = new(-1);
+      private static readonly IntPtr HWND_NOTOPMOST = new(-2);
+
+      private const uint SWP_NOSIZE = 0x0001;
+      private const uint SWP_NOMOVE = 0x0002;
+      private const uint SWP_NOACTIVATE = 0x0010;
+
+      private const int WM_WINDOWPOSCHANGING = 0x0046;
+      private const uint SWP_NOZORDER = 0x0004;
+
+      [StructLayout(LayoutKind.Sequential)]
+      private struct WINDOWPOS
+      {
+         public IntPtr hwnd;
+         public IntPtr hwndInsertAfter;
+         public int x;
+         public int y;
+         public int cx;
+         public int cy;
+         public uint flags;
+      }
+
       private readonly DispatcherTimer _followTimer = new DispatcherTimer();
       private double? _lastTargetX;
       private double? _lastTargetY;
@@ -51,8 +81,8 @@ namespace StickIt
 
       private IntPtr _prevWin32Owner = IntPtr.Zero;
 
-      private static double PointsToDip(double pt) => pt * 96.0 / 72.0; // pt * 4/3
-      private static double DipToPoints(double dip) => dip * 72.0 / 96.0;
+      //private static double PointsToDip(double pt) => pt * 96.0 / 72.0; // pt * 4/3
+      //private static double DipToPoints(double dip) => dip * 72.0 / 96.0;
 
       private static double NormalizeFontSize(double size, double fallback = 14.0)
          => size > 0 ? size : fallback;
@@ -273,6 +303,9 @@ namespace StickIt
          return false;
       }
 
+      [DllImport("user32.dll", SetLastError = true)]
+      private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
       [DllImport("user32.dll")]
       private static extern bool IsWindow(IntPtr hWnd);
 
@@ -491,6 +524,13 @@ namespace StickIt
          StateChanged += NoteWindow_StateChanged;
          Closing += NoteWindow_Closing;
 
+         SourceInitialized += (s, e) =>
+         {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            var source = HwndSource.FromHwnd(hwnd);
+            source?.AddHook(WndProc);
+         };
+
          CommandBindings.Add(new CommandBinding(CmdBold,
    (_, __) => ToggleBold(),
    (_, e) => e.CanExecute = CanFormat()));
@@ -697,6 +737,24 @@ namespace StickIt
          base.OnClosed(e);
       }
 
+
+      private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+      {
+         if (msg == WM_WINDOWPOSCHANGING && _noteStuckMode == 2 && IsDesktopLikeTarget(_stickyTarget))
+         {
+            var wp = Marshal.PtrToStructure<WINDOWPOS>(lParam);
+
+            // If Windows is trying to bring this window to the top (HWND_TOP is IntPtr.Zero),
+            // intercept it and force it to stay at HWND_BOTTOM!
+            if (wp.hwndInsertAfter == HWND_TOP || wp.hwndInsertAfter == IntPtr.Zero)
+            {
+               wp.hwndInsertAfter = HWND_BOTTOM;
+               Marshal.StructureToPtr(wp, lParam, false);
+            }
+         }
+
+         return IntPtr.Zero;
+      }
 
 
       private void Menu_ToggleLock(object sender, RoutedEventArgs e)
@@ -2211,8 +2269,9 @@ namespace StickIt
             int currentX = (int)Math.Round(notePx.X);
             int currentY = (int)Math.Round(notePx.Y);
 
-            // Enforce Z-order without moving it
-            StickIt.Sticky.Services.WindowMoveService.MoveWindow(myHwnd, currentX, currentY, IntPtr.Zero);
+            // Enforce desktop Z-order: Pin to the bottom of the normal window stack!
+            // Never pass IntPtr.Zero (HWND_TOP) here.
+            StickIt.Sticky.Services.WindowMoveService.MoveWindow(myHwnd, currentX, currentY, HWND_BOTTOM);
             return true;
          }
 
@@ -2564,13 +2623,60 @@ namespace StickIt
       {
          if (mode < 0 || mode > 2) mode = 0;
 
-         // if we are leaving mode 2, undo local AOT owner
+         // 1. Leaving mode 2 -> undo local AOT owner
          if (_noteStuckMode == 2 && mode != 2)
             ClearLocalAotOwner();
 
          StuckMode = mode;
          Topmost = (mode == 1);
          UpdateStickyVisuals();
+
+         var hwnd = new WindowInteropHelper(this).Handle;
+         if (hwnd == IntPtr.Zero) return;
+
+         // 2. Explicitly transition the Win32 Z-band so the window never gets trapped!
+         switch (mode)
+         {
+            case 0: // Normal: Pull OUT of bottom-purgatory and back to the standard application band
+               SetWindowPos(
+                  hwnd,
+                  HWND_NOTOPMOST,
+                  0, 0, 0, 0,
+                  SWP_NOMOVE | SWP_NOSIZE);
+
+               // Give it a quick bump to the top of the normal stack so the user can see and grab it
+               SetWindowPos(
+                  hwnd,
+                  HWND_TOP,
+                  0, 0, 0, 0,
+                  SWP_NOMOVE | SWP_NOSIZE);
+               break;
+
+            case 1: // Always on top: Force into the topmost band
+               SetWindowPos(
+                  hwnd,
+                  HWND_TOPMOST,
+                  0, 0, 0, 0,
+                  SWP_NOMOVE | SWP_NOSIZE);
+               break;
+
+            case 2: // Stuck: If desktop, strip topmost and push straight to the bottom
+               if (IsDesktopLikeTarget(_stickyTarget))
+               {
+                  SetWindowPos(
+                        hwnd,
+                        HWND_NOTOPMOST,
+                        0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+
+                  SetWindowPos(
+                     hwnd,
+                     HWND_BOTTOM,
+                     0, 0, 0, 0,
+                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+               }
+               break;
+         }
       }
 
       public void ApplyLeadingPreference(double multiplier)
