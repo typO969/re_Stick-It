@@ -2,29 +2,37 @@
 
 Lightweight desktop sticky notes for Windows, built with WPF on `.NET 8`, blah, blah, blah.
 
-## So one day I was sitting in class, using an Apple and I noticed the version of 'Post-It" notes they get to use and play around with.
-## And then I looked at the version that Windows has and it made me sad at first and then it lit a fire! It isn't fair that Swift programs look way more polished and dont make me feel embarrassed to use them in public.
+## So one day I was sitting in class, using an Apple and I noticed the version of 'Post-It" notes they get to use n things.
+## And then I compared the version that Windows has and it made me a sad panda. It isn't fair that Swift programs look way more polished and dont make me feel embarrassed to use them in public!!
 
-### Later, after I remembered that I needed to make a post-it note program for these raisins, 
--<u>I decided this version would more accurately mimick the real world.</u>-
+### I decided to take their good app design as a challenge and build a note simulator of my own!!
+
+### As I sat around day-dreaming about this program and actively ignoring and procrastinating in all my classes,
+-<u>I decided this version would be as real as possible in features. pretty mostly.</u>-<br>
+I thought about all the raisins to do this and the raisins not to do it and then did it anyway.
 
 ### THIS meant: 
 - no resizing
 - only the colors my eyes could find at the store
 - you can stick your notes to any surface and they will stay there for the most part
-- no videos or music! how tf would you do that in real life!?!? get real!!
-- i did add some list tmeplating to make things easier.
+- no videos or music! how tf would you do that in real life!?!? get real, you monster!!
 - i also added support for windows ink, so now you can draw on your notes! unfortunately for me i cant read my handwriting.. :(
-- theres probably a bunch of other things I thought of and already forgot about too.
+  - so every one wins, but not me...
+- plus other more extra bonus hidden improved items not found in stores!
 
-### So, before you read the next section -OR- use the app, just keep in mind I was aiming for realism.
+### So, before you read the next section -OR- use the app, just keep in mind I was aiming for realism (while aiming with hand grenades).
 
-## So, then I found that neato program 'Notezilla' and saw how free it isnt, and then i saw how much they they think it is worth.   
+## My version is -4x times better than Notezilla.
 
-## So I thought at some random person, "I can do what you do!!! You better watch out! I can do it better and cheaper!"
+## For some reason, there was a couple days I couldnt keep my internal narrator internal.
 
-## I startled them so profusely that they punched me to get away--strong tactic and choice on their part. 
+## So I excitedly thought/yelled at some random person who just wanted to pay for their Dairy Queen and leave, <br>
+   "I can do what you do!!!" I yelled with no context as to what and why i was yelling. "You better watch out! I can do it better and cheaper!"<br>
+   I was also pretty drunk, which helped explain why I couldnt find any pants to put on and wear.
 
+## That innocent standbyer was completely spaced out and I startled the rando so profusely that they ran at me, punched me, giggled, and then ran out of DQ.<br>
+  I hope you've enjoyed this ancient tale of wonder and excitement!!! It has absolutely nothing to do with post-it notes.
+  and none of it will be on any quizzes or finals! so stop looking so worried and scared!!
 #
 #
 
@@ -43,6 +51,9 @@ Lightweight desktop sticky notes for Windows, built with WPF on `.NET 8`, blah, 
 - Optional “keep notes inside desktop area”
 - Preferences for theme, taskbar/tray visibility, startup behavior, and default font
 - Finally fixed sticking behavior. Notes should now stick to any window with 1 click!
+- Notes gradually age and get bent out of shape over time.
+- Notes can have slightly off angles, just like real life
+- Just like in real life, these notes arent very practical if you have lots to say or remember
 - Extensive help file coming soon.
 
 ## Tech Stack
@@ -81,10 +92,9 @@ Application state is persisted as JSON and includes:
 - Notes (geometry, content, title, color, font, sticky metadata)
 - App preferences
 
-## Screenshots
+## ~Screenshots~Photo Gallery
 
-> I mean, you've seen the small squares of paper having adhesive on them with all the wild color choices out in the real world, right? 
-> Ok, fine, here are some photos of post-it notes...
+> Enjoy these real photos I took of post-it notes!!
 <img width="500" alt="post2" src="https://github.com/user-attachments/assets/12f0eb1e-1763-475b-b0eb-9d08657bee1f" />
 <img width="500" alt="post04" src="https://github.com/user-attachments/assets/e6e07a06-56db-4659-9259-f69fc0a11cde" />
 <img width="500" alt="post01" src="https://github.com/user-attachments/assets/251c856b-da55-4c99-a538-7b3f6824320c" />
@@ -92,10 +102,10 @@ Application state is persisted as JSON and includes:
 
 ## Roadmap
 
-- [ ] ~Search/filter notes~  haha, no, probably not, copilot.
+- [ ] ~Search/filter notes~  haha, no, nice try! probably not, copilot.
 - [X] Import/export notes
-- [x] Optional cloud sync - it works if you use sync.com or something similar.
-- [ ] Keyboard shortcut customization  - *meh, we'll see.*
+- [x] Optional cloud sync - it works if you use sync.com or just LAN filesharing.
+- [x] Keyboard shortcut customization  - also mostly done.
 
 ## Contributing Conclusions
 
