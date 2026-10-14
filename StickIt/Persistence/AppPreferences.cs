@@ -70,6 +70,8 @@ namespace StickIt.Persistence
       public double MaxNoteRotation { get; set; } = 4.0; // Default to your favorite value
       public bool EnableNoteAging { get; set; } = true;
 
+      public bool EnableMiddleClickDrag { get; set; } = true;
+
       public bool SyncEnabled { get; set; }
 		public string SyncFilePath { get; set; } = string.Empty;
 		public bool SyncPreferences { get; set; } = true;

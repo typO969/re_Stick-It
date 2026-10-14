@@ -146,6 +146,15 @@ namespace StickIt
       private const double SnapGridSizeDefault = 20.0;
       private const double SnapGridSizeLowResolution = 16.0;
       private string _todoTemplateRtf = string.Empty;
+
+
+      private bool _isMiddleDragging;
+      private double _dragStartCursorX;
+      private double _dragStartCursorY;
+      private double _dragStartWindowLeft;
+      private double _dragStartWindowTop;
+
+
       private static readonly Regex BulletTriggerRegex = new(@"^(\s*)([-*+])\s*(.*)$", RegexOptions.Compiled);
       private static readonly Regex NumberTriggerRegex = new(@"^(\s*)(\d+)([\.)])?\s*(.*)$", RegexOptions.Compiled);
       private static readonly Regex HashTriggerRegex = new(@"^(\s*)#\s*(.*)$", RegexOptions.Compiled);
@@ -311,6 +320,15 @@ namespace StickIt
 
       [DllImport("user32.dll")]
       private static extern bool IsIconic(IntPtr hWnd);
+
+      private const int WM_NCLBUTTONDOWN = 0x00A1;
+      private const int HTCAPTION = 0x0002;
+
+      [DllImport("user32.dll")]
+      private static extern bool ReleaseCapture();
+
+      [DllImport("user32.dll")]
+      private static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, IntPtr lParam);
 
       private bool IsNoteVisibleOnAnyScreen()
       {
@@ -524,6 +542,14 @@ namespace StickIt
          StateChanged += NoteWindow_StateChanged;
          Closing += NoteWindow_Closing;
 
+
+         this.PreviewMouseDown += NoteWindow_PreviewMouseDown;
+         PreviewMouseDown += NoteWindow_PreviewMouseDown;
+         PreviewMouseMove += NoteWindow_PreviewMouseMove;
+         PreviewMouseUp += NoteWindow_PreviewMouseUp;
+
+
+
          SourceInitialized += (s, e) =>
          {
             var hwnd = new WindowInteropHelper(this).Handle;
@@ -571,6 +597,8 @@ namespace StickIt
                return;
             }
          };
+
+
 
 
 
@@ -690,6 +718,78 @@ namespace StickIt
 
             InitializeTypingDefaultsFromNote(); // typing defaults only
          });
+      }
+
+
+
+
+
+      private void NoteWindow_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+      {
+         if (e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+         {
+            // Mode 2 (Stuck to desktop / host window) cannot be manually moved
+            if (_noteStuckMode == 2) return;
+
+            // Honor user preference
+            var prefs = (System.Windows.Application.Current as App)?.Preferences;
+            if (prefs == null || !prefs.EnableMiddleClickDrag) return;
+
+            try
+            {
+               _isMiddleDragging = true;
+               var cursor = System.Windows.Forms.Cursor.Position;
+               _dragStartCursorX = cursor.X;
+               _dragStartCursorY = cursor.Y;
+               _dragStartWindowLeft = this.Left;
+               _dragStartWindowTop = this.Top;
+
+               CaptureMouse();
+               e.Handled = true;
+            }
+            catch
+            {
+               _isMiddleDragging = false;
+            }
+         }
+      }
+
+      private void NoteWindow_PreviewMouseMove(object sender, System.Windows.Input.MouseEventArgs e)
+      {
+         if (_isMiddleDragging && e.MiddleButton == System.Windows.Input.MouseButtonState.Pressed)
+         {
+            try
+            {
+               var currentCursor = System.Windows.Forms.Cursor.Position;
+
+               // Calculate DPI scaling factor so dragging tracks 1:1 on High-DPI displays
+               var source = PresentationSource.FromVisual(this);
+               double dpiScaleX = source?.CompositionTarget?.TransformToDevice.M11 ?? 1.0;
+               double dpiScaleY = source?.CompositionTarget?.TransformToDevice.M22 ?? 1.0;
+
+               double deltaX = (currentCursor.X - _dragStartCursorX) / dpiScaleX;
+               double deltaY = (currentCursor.Y - _dragStartCursorY) / dpiScaleY;
+
+               this.Left = _dragStartWindowLeft + deltaX;
+               this.Top = _dragStartWindowTop + deltaY;
+
+               e.Handled = true;
+            }
+            catch
+            {
+               // Silent fallback for UI rendering exceptions
+            }
+         }
+      }
+
+      private void NoteWindow_PreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+      {
+         if (_isMiddleDragging && e.ChangedButton == System.Windows.Input.MouseButton.Middle)
+         {
+            _isMiddleDragging = false;
+            ReleaseMouseCapture();
+            e.Handled = true;
+         }
       }
 
 

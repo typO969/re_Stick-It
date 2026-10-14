@@ -301,6 +301,8 @@ namespace StickIt
       public double MaxNoteRotation { get => _maxNoteRotation; set => SetField(ref _maxNoteRotation, value); }
       public bool EnableNoteAging { get => _enableNoteAging; set => SetField(ref _enableNoteAging, value); }
 
+      public bool EnableMiddleClickDrag { get => _enableMiddleClickDrag; set => SetField(ref _enableMiddleClickDrag, value); }
+
       public bool Mode2CloseNoteWhenHostCloses { get => _mode2CloseNoteWhenHostCloses; set => SetField(ref _mode2CloseNoteWhenHostCloses, value); }
       public Mode2HostMissingAction Mode2HostMissingAction
       {
@@ -423,7 +425,7 @@ namespace StickIt
       private bool _enableNoteRotation = true;
       private double _maxNoteRotation = 4.0;
       private bool _enableNoteAging = true;
-
+      private bool _enableMiddleClickDrag = true;
       public event PropertyChangedEventHandler? PropertyChanged;
 
       private PreferencesViewModel()
@@ -508,8 +510,8 @@ namespace StickIt
             DesktopAreaHeight = prefs.DesktopAreaHeight,
             EnableNoteRotation = prefs.EnableNoteRotation,
             MaxNoteRotation = prefs.MaxNoteRotation >= 1.0 ? prefs.MaxNoteRotation : 4.0,
-            EnableNoteAging = prefs.EnableNoteAging
-
+            EnableNoteAging = prefs.EnableNoteAging,
+            EnableMiddleClickDrag = prefs.EnableMiddleClickDrag
          };
 
          vm.RefreshDesktopAreaSummary();
@@ -571,7 +573,8 @@ namespace StickIt
             TodoTemplateRtf = TodoTemplateRtf,
             EnableNoteRotation = EnableNoteRotation,
             MaxNoteRotation = MaxNoteRotation,
-            EnableNoteAging = EnableNoteAging
+            EnableNoteAging = EnableNoteAging,
+            EnableMiddleClickDrag = EnableMiddleClickDrag
          };
       }
 
