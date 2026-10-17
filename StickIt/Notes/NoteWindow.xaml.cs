@@ -103,6 +103,14 @@ namespace StickIt
          }
       }
 
+      private double GetLineHeightDip(double fontSize)
+      {
+         var size = NormalizeFontSize(fontSize);
+         var multiplier = GetLineHeightMultiplier();
+         multiplier = NormalizeLineHeightMultiplier(multiplier);
+         return size * multiplier;
+      }
+
       private bool _suppressTextChanged;
       private bool _suppressAutoListHandling;
       private bool _dropShadowEnabled = true;
@@ -155,9 +163,14 @@ namespace StickIt
       private double _dragStartWindowTop;
 
 
-      private static readonly Regex BulletTriggerRegex = new(@"^(\s*)([-*+])\s*(.*)$", RegexOptions.Compiled);
-      private static readonly Regex NumberTriggerRegex = new(@"^(\s*)(\d+)([\.)])?\s*(.*)$", RegexOptions.Compiled);
-      private static readonly Regex HashTriggerRegex = new(@"^(\s*)#\s*(.*)$", RegexOptions.Compiled);
+      [GeneratedRegex(@"^(\s*)([-*+])\s*(.*)$")]
+      private static partial Regex BulletTriggerRegex();
+
+      [GeneratedRegex(@"^(\s*)(\d+)([\.)])?\s*(.*)$")]
+      private static partial Regex NumberTriggerRegex();
+
+      [GeneratedRegex(@"^(\s*)#\s*(.*)$")]
+      private static partial Regex HashTriggerRegex();
 
       private enum InkToolbarDock
       {
@@ -439,15 +452,15 @@ namespace StickIt
 
       public static readonly RoutedUICommand CmdBold =
    new RoutedUICommand("Bold", "CmdBold", typeof(NoteWindow),
-      new InputGestureCollection { new KeyGesture(Key.B, ModifierKeys.Control) });
+      [new KeyGesture(Key.B, ModifierKeys.Control)]);
 
       public static readonly RoutedUICommand CmdItalic =
          new RoutedUICommand("Italic", "CmdItalic", typeof(NoteWindow),
-            new InputGestureCollection { new KeyGesture(Key.I, ModifierKeys.Control) });
+            [new KeyGesture(Key.I, ModifierKeys.Control)]);
 
       public static readonly RoutedUICommand CmdUnderline =
          new RoutedUICommand("Underline", "CmdUnderline", typeof(NoteWindow),
-            new InputGestureCollection { new KeyGesture(Key.U, ModifierKeys.Control) });
+            [new KeyGesture(Key.U, ModifierKeys.Control)]);
 
 
 
@@ -983,6 +996,37 @@ namespace StickIt
          else if (stage == 7) ApplyFolds("1chr", "4cvr", "2dl", "3br"); // Valid paired tear
          else if (stage == 8) ApplyFolds("4chl", "1cvl", "3dr", "2bl"); // Max wear
       }
+
+      private void UpdateCaretBrush()
+      {
+         // Set the caret brush based on the content foreground color luminance.
+         try
+         {
+            var defaultBrush = System.Windows.Media.Brushes.Black;
+            var fore = txtNoteContent?.Foreground as System.Windows.Media.SolidColorBrush;
+            if (fore != null)
+            {
+               var c = fore.Color;
+               double lum = (0.299 * c.R + 0.587 * c.G + 0.114 * c.B) / 255.0;
+               CaretBrush = lum < 0.5 ? System.Windows.Media.Brushes.White : System.Windows.Media.Brushes.Black;
+            }
+            else
+            {
+               CaretBrush = defaultBrush;
+            }
+
+            if (txtNoteContent != null && _note != null && _note.IsLocked)
+               txtNoteContent.CaretBrush = System.Windows.Media.Brushes.Transparent;
+            else if (txtNoteContent != null)
+               txtNoteContent.CaretBrush = CaretBrush;
+         }
+         catch
+         {
+            CaretBrush = System.Windows.Media.Brushes.Black;
+            if (txtNoteContent != null) txtNoteContent.CaretBrush = CaretBrush;
+         }
+      }
+
       private void ApplyFolds(params string[] folds)
       {
          var perimeter = new System.Windows.Media.PointCollection();
@@ -1236,7 +1280,7 @@ namespace StickIt
          sizeDip = (fs is double d && d > 0) ? d : ((_note?.FontSize ?? 0) > 0 ? _note!.FontSize : 16.0);
 
          bold = (fw is FontWeight w) && (w == FontWeights.Bold);
-         italic = (fst is System.Windows.FontStyle s) && (s == System.Windows.FontStyles.Italic);
+         italic = (fst is System.Windows.FontStyle s) && (s == FontStyles.Italic);
 
       }
 
@@ -1750,6 +1794,33 @@ namespace StickIt
 
       }
 
+      private void UpdateLineSpacing()
+      {
+         if (txtNoteContent == null || txtNoteContent.Document == null) return;
+
+         double multiplier = GetLineHeightMultiplier();
+
+         foreach (var paragraph in txtNoteContent.Document.Blocks.OfType<Paragraph>())
+         {
+            double baseSize = paragraph.FontSize;
+            if (double.IsNaN(baseSize) || baseSize <= 0)
+            {
+               double maxRunSize = 0;
+               foreach (var run in paragraph.Inlines.OfType<Run>())
+               {
+                  if (!double.IsNaN(run.FontSize) && run.FontSize > maxRunSize)
+                     maxRunSize = run.FontSize;
+               }
+               baseSize = maxRunSize > 0 ? maxRunSize : (_note?.FontSize ?? 14.0);
+            }
+
+            if (baseSize <= 0) baseSize = 14.0;
+
+            paragraph.LineHeight = baseSize * multiplier;
+            paragraph.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
+         }
+      }
+
       public string? GetRtf()
       {
          try
@@ -2180,7 +2251,7 @@ namespace StickIt
             (_note?.FontSize > 0 ? _note.FontSize : 14.0);
 
          bool bold = (fw is FontWeight w) && (w == FontWeights.Bold);
-         bool italic = (fst is System.Windows.FontStyle s) && (s == System.Windows.FontStyles.Italic);
+         bool italic = (fst is System.Windows.FontStyle s) && (s == FontStyles.Italic);
 
          var deco = sel.GetPropertyValue(Inline.TextDecorationsProperty);
          bool underline = HasDecorationLocation(GetDecorationsOrEmpty(deco), TextDecorationLocation.Underline);
@@ -2338,8 +2409,10 @@ namespace StickIt
          var dlg = new StickIt.Sticky.StickyTargetPickerWindow { Owner = this };
          if (dlg.ShowDialog() != true || dlg.SelectedTarget == null) return;
 
-         if (!EnterStuckMode2WithTarget(dlg.SelectedTarget, allowDesktopFallback: true))
-            TryEnterMode2DesktopFallback();
+         if (EnterStuckMode2WithTarget(dlg.SelectedTarget, allowDesktopFallback: true))
+            return;
+
+         TryEnterMode2DesktopFallback();
       }
 
 
@@ -3460,7 +3533,7 @@ namespace StickIt
          if (string.IsNullOrWhiteSpace(text))
             return false;
 
-         var match = BulletTriggerRegex.Match(text);
+         var match = BulletTriggerRegex().Match(text);
          if (!match.Success)
             return false;
 
@@ -3478,7 +3551,7 @@ namespace StickIt
          if (string.IsNullOrWhiteSpace(text))
             return false;
 
-         var match = NumberTriggerRegex.Match(text);
+         var match = NumberTriggerRegex().Match(text);
          if (!match.Success)
             return false;
 
@@ -3497,7 +3570,7 @@ namespace StickIt
          if (string.IsNullOrWhiteSpace(text))
             return false;
 
-         var match = HashTriggerRegex.Match(text);
+         var match = HashTriggerRegex().Match(text);
          if (!match.Success)
             return false;
 
@@ -3562,11 +3635,17 @@ namespace StickIt
 
       //      var range = GetParagraphContentRange(paragraph);
       //      var decorations = GetDecorationsOrEmpty(range.GetPropertyValue(Inline.TextDecorationsProperty));
-      //      if (!HasDecorationLocation(decorations, TextDecorationLocation.Strikethrough))
-      //         continue;
 
-      //      RemoveDecorationLocation(decorations, TextDecorationLocation.Strikethrough);
+      //      if (HasDecorationLocation(decorations, TextDecorationLocation.Strikethrough))
+      //         RemoveDecorationLocation(decorations, TextDecorationLocation.Strikethrough);
+      //      else
+      //      {
+      //         foreach (var d in TextDecorations.Strikethrough)
+      //            decorations.Add(d.Clone());
+      //      }
+
       //      range.ApplyPropertyValue(Inline.TextDecorationsProperty, decorations.Count == 0 ? null : decorations);
+
       //      changed = true;
       //   }
 
@@ -3598,122 +3677,51 @@ namespace StickIt
 
       private void ApplyParagraphTemplateStyle(Paragraph paragraph, string? templateRtf, string text)
       {
-         var style = ExtractTemplateStyle(paragraph, templateRtf);
+         var style = ExtractCurrentParagraphStyle(paragraph);
+         if (!string.IsNullOrWhiteSpace(templateRtf))
+         {
+            try
+            {
+               var doc = new FlowDocument();
+               using var ms = new MemoryStream(Encoding.UTF8.GetBytes(templateRtf));
+               new TextRange(doc.ContentStart, doc.ContentEnd).Load(ms, System.Windows.DataFormats.Rtf);
+
+               var para = doc.Blocks.OfType<Paragraph>().FirstOrDefault();
+               if (para != null)
+               {
+                  style.Margin = para.Margin;
+                  style.TextIndent = para.TextIndent;
+
+                  var sampleRun = para.Inlines.OfType<Run>().FirstOrDefault();
+                  if (sampleRun != null)
+                  {
+                     style.FontFamily = sampleRun.FontFamily;
+                     style.FontSize = sampleRun.FontSize;
+                     style.FontWeight = sampleRun.FontWeight;
+                     style.FontStyle = sampleRun.FontStyle;
+                     style.TextDecorations = sampleRun.TextDecorations;
+                     style.Foreground = sampleRun.Foreground;
+                  }
+               }
+            }
+            catch
+            {
+               // keep defaults
+            }
+         }
+
          paragraph.Margin = style.Margin;
          paragraph.TextIndent = style.TextIndent;
-         paragraph.LineHeight = GetLineHeightDip(style.FontSize);
-         paragraph.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
-
          paragraph.Inlines.Clear();
-         var run = new Run(text)
+         paragraph.Inlines.Add(new Run(text)
          {
             FontFamily = style.FontFamily,
             FontSize = style.FontSize,
             FontWeight = style.FontWeight,
-            FontStyle = style.FontStyle
-         };
-
-         if (style.TextDecorations != null)
-            run.TextDecorations = style.TextDecorations;
-
-         if (style.Foreground != null)
-            run.Foreground = style.Foreground;
-
-         paragraph.Inlines.Add(run);
-      }
-
-      private double GetLineHeightDip(double fontSizeDip)
-      {
-         var multiplier = NormalizeLineHeightMultiplier(_note?.LineHeightMultiplier ?? _lineHeightMultiplier);
-         return Math.Max(1.0, fontSizeDip * multiplier);
-      }
-
-      private void UpdateLineSpacing()
-      {
-         if (txtNoteContent?.Document == null)
-            return;
-
-         var fontSize = _note?.FontSize > 0 ? _note.FontSize : txtNoteContent.FontSize;
-         txtNoteContent.Document.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
-
-         foreach (var paragraph in txtNoteContent.Document.Blocks.OfType<Paragraph>())
-         {
-            var run = paragraph.Inlines.OfType<Run>().FirstOrDefault();
-            var paragraphFontSize = run?.FontSize ?? paragraph.FontSize;
-            if (double.IsNaN(paragraphFontSize) || paragraphFontSize <= 0)
-               paragraphFontSize = fontSize > 0 ? fontSize : 14.0;
-
-            var lineHeight = GetLineHeightDip(paragraphFontSize);
-            paragraph.LineHeight = lineHeight;
-            paragraph.LineStackingStrategy = LineStackingStrategy.BlockLineHeight;
-         }
-
-         txtNoteContent.UpdateLayout();
-      }
-
-      private void UpdateCaretBrush()
-      {
-         if (txtNoteContent == null)
-            return;
-
-         var color = GetCurrentCaretColor();
-         var brush = new SolidColorBrush(color);
-         brush.Freeze();
-         CaretBrush = brush;
-      }
-
-      private System.Windows.Media.Color GetCurrentCaretColor()
-      {
-         var selection = txtNoteContent?.Selection;
-         if (selection != null)
-         {
-            var fg = selection.GetPropertyValue(TextElement.ForegroundProperty);
-            if (fg is SolidColorBrush solid)
-               return solid.Color;
-         }
-
-         if (txtNoteContent?.Foreground is SolidColorBrush fallback)
-            return fallback.Color;
-
-         return GetDefaultTextColor();
-      }
-
-      private ListTemplateStyle ExtractTemplateStyle(Paragraph paragraph, string? templateRtf)
-      {
-         var style = ExtractCurrentParagraphStyle(paragraph);
-         if (string.IsNullOrWhiteSpace(templateRtf))
-            return style;
-
-         try
-         {
-            var doc = new FlowDocument();
-            using var ms = new MemoryStream(Encoding.UTF8.GetBytes(templateRtf));
-            new TextRange(doc.ContentStart, doc.ContentEnd).Load(ms, System.Windows.DataFormats.Rtf);
-
-            var para = doc.Blocks.OfType<Paragraph>().FirstOrDefault();
-            if (para == null)
-               return style;
-
-            style.Margin = para.Margin;
-            style.TextIndent = para.TextIndent;
-
-            var sampleRun = para.Inlines.OfType<Run>().FirstOrDefault();
-            if (sampleRun == null)
-               return style;
-
-            style.FontFamily = sampleRun.FontFamily;
-            style.FontSize = sampleRun.FontSize;
-            style.FontWeight = sampleRun.FontWeight;
-            style.FontStyle = sampleRun.FontStyle;
-            style.TextDecorations = sampleRun.TextDecorations;
-            style.Foreground = sampleRun.Foreground;
-         }
-         catch
-         {
-            // keep defaults
-         }
-
-         return style;
+            FontStyle = style.FontStyle,
+            TextDecorations = style.TextDecorations,
+            Foreground = style.Foreground
+         });
       }
 
       private static ListTemplateStyle ExtractCurrentParagraphStyle(Paragraph paragraph)
@@ -3936,13 +3944,13 @@ namespace StickIt
 
 
       // +++++++++ +++++++++++++ BEGIN TEMP STICKY TARGET DEBUGGING ++++++++++++++++++++
-      private void Menu_RebindStickyTarget(object sender, RoutedEventArgs e)
-      {
-         var ok = TryRebindStickyTarget();
-         // Optional: you can show a tiny MessageBox if you want.
-         // If you do, keep it subtle (or just do nothing).
-         if (ok) AppInstance.QueueSaveFromWindow();
-      }
+      //private void Menu_RebindStickyTarget(object sender, RoutedEventArgs e)
+      //{
+      //   var ok = TryRebindStickyTarget();
+      //   // Optional: you can show a tiny MessageBox if you want.
+      //   // If you do, keep it subtle (or just do nothing).
+      //   if (ok) AppInstance.QueueSaveFromWindow();
+      //}
 
       // +++++++++ +++++++++++++ END TEMP STICKY TARGET DEBUGGING ++++++++++++++++++++
 

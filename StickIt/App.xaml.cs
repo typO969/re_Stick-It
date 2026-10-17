@@ -31,9 +31,6 @@ namespace StickIt
       private double _nextSpawnTop = 200;
 
 
-
-
-
       private DateTime? _pendingSaveDueUtc;
       private bool _suppressAutoSave;
 
